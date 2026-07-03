@@ -134,6 +134,15 @@ def youtube():
     return out
 
 
+SOURCE_KEYS = {
+    "app_store":   ["ios_rating", "ios_ratings_count"],
+    "google_play": ["android_rating", "android_ratings_count"],
+    "tiktok":      ["tiktok_followers", "tiktok_likes", "tiktok_videos"],
+    "instagram":   ["instagram_followers", "instagram_posts"],
+    "youtube":     ["youtube_subscribers", "youtube_videos"],
+}
+
+
 def main():
     sources = {
         "app_store": appstore,
@@ -142,17 +151,40 @@ def main():
         "instagram": instagram,
         "youtube": youtube,
     }
+
+    # Last known values — a blocked scrape keeps yesterday's number instead of a hole
+    prev_metrics, prev_updated = {}, {}
+    prev_path = os.path.join(HERE, "data", "metrics.json")
+    if os.path.exists(prev_path):
+        try:
+            with open(prev_path) as f:
+                prev = json.load(f)
+            prev_metrics = prev.get("metrics", {})
+            prev_updated = prev.get("sources_updated", {})
+        except json.JSONDecodeError:
+            pass
+
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     data = {}
     status = {}
+    sources_updated = {}
     for name, fn in sources.items():
+        got = {}
         try:
             got = fn()
-            data.update(got)
-            status[name] = bool(got)
-            print(f"  {'OK ' if got else 'MISS'} {name}: {got}")
         except Exception as e:
-            status[name] = False
             print(f"  FAIL {name}: {e}")
+        if got:
+            data.update(got)
+            status[name] = True
+            sources_updated[name] = now
+            print(f"  OK   {name}: {got}")
+        else:
+            carried = {k: prev_metrics[k] for k in SOURCE_KEYS.get(name, []) if k in prev_metrics}
+            data.update(carried)
+            status[name] = bool(carried)
+            sources_updated[name] = prev_updated.get(name)
+            print(f"  MISS {name}: carried forward {carried or 'nothing'}")
 
     # These need credentials or team access — see README
     status["facebook"] = False
@@ -166,12 +198,12 @@ def main():
         with open(manual_path) as f:
             manual = json.load(f)
 
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     payload = {
         "last_updated": now,
         "metrics": data,
         "manual": manual,
         "status": status,
+        "sources_updated": sources_updated,
     }
     os.makedirs(os.path.join(HERE, "data"), exist_ok=True)
     with open(os.path.join(HERE, "data", "metrics.json"), "w") as f:

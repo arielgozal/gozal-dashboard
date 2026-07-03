@@ -24,5 +24,19 @@
     "tiktok_videos": 101,
     "youtube_subscribers": 14,
     "youtube_videos": 49
+  },
+  {
+    "ts": "2026-07-03T17:14:11+00:00",
+    "ios_rating": 4.5,
+    "ios_ratings_count": 17,
+    "android_rating": 5.0,
+    "android_ratings_count": 13,
+    "tiktok_followers": 131,
+    "tiktok_likes": 576,
+    "tiktok_videos": 101,
+    "instagram_followers": 28,
+    "instagram_posts": 124,
+    "youtube_subscribers": 14,
+    "youtube_videos": 49
   }
 ]
