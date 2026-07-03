@@ -1,0 +1,32 @@
+{
+  "last_updated": "2026-07-03T16:24:19+00:00",
+  "metrics": {
+    "ios_rating": 4.5,
+    "ios_ratings_count": 17,
+    "android_rating": 5.0,
+    "android_ratings_count": 13,
+    "tiktok_followers": 131,
+    "tiktok_likes": 576,
+    "tiktok_videos": 100,
+    "instagram_followers": 28,
+    "instagram_posts": 123,
+    "youtube_subscribers": 14,
+    "youtube_videos": 49
+  },
+  "manual": {
+    "android_installs_lifetime": 141,
+    "android_installs_as_of": "2026-07-02",
+    "android_installs_source": "Play Console dashboard (manual)",
+    "notes": "Update these by editing this file until API access for download counts is granted."
+  },
+  "status": {
+    "app_store": true,
+    "google_play": true,
+    "tiktok": true,
+    "instagram": true,
+    "youtube": true,
+    "facebook": false,
+    "ga4_website": false,
+    "download_counts": false
+  }
+}

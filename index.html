@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gozal — Growth Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FDCB15;
+    --yellow-soft: #FFF3B0;
+    --mustard: #E4B616;
+    --black: #101703;
+    --charcoal: #2C2C2C;
+    --beige: #FAF5E6;
+    --grey: #EEF2F4;
+    --white: #FFFFFF;
+    --muted: #7a7a72;
+    --green: #1f9d55;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Poppins', -apple-system, sans-serif;
+    background: var(--beige);
+    color: var(--black);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--black);
+    color: var(--white);
+    padding: 18px 28px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .logo-mark {
+    background: var(--yellow); color: var(--black);
+    font-weight: 800; font-size: 22px;
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-text { font-weight: 800; font-size: 20px; letter-spacing: 0.5px; }
+  .logo-text span { color: var(--yellow); }
+  .header-sub { font-size: 12px; color: #b8b8ae; font-weight: 500; }
+  .header-right { margin-left: auto; text-align: right; }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(253, 203, 21, 0.15); color: var(--yellow);
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--yellow);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .updated { font-size: 11px; color: #8a8a80; margin-top: 5px; }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 26px 24px 60px; }
+
+  h2 {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--muted);
+    margin: 34px 0 14px;
+  }
+  h2:first-of-type { margin-top: 8px; }
+
+  .grid { display: grid; gap: 16px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 960px) { .g4 { grid-template-columns: repeat(2,1fr);} .g3{grid-template-columns:1fr 1fr;} }
+  @media (max-width: 560px) { .g4, .g3, .g2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: 0 1px 3px rgba(16,23,3,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .card.hero {
+    background: var(--black); color: var(--white);
+  }
+  .card.hero .label { color: #b8b8ae; }
+  .card.hero .big { color: var(--yellow); }
+  .card.accent { background: var(--yellow); }
+  .card.accent .label { color: rgba(16,23,3,0.6); }
+
+  .label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
+  .big { font-size: 42px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
+  .sub { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+  .card.hero .sub { color: #8a8a80; }
+  .card.accent .sub { color: rgba(16,23,3,0.55); }
+
+  .stars { color: var(--mustard); font-size: 18px; letter-spacing: 2px; }
+  .card.hero .stars { color: var(--yellow); }
+
+  /* goal progress */
+  .goal { margin-top: 14px; }
+  .goal-bar {
+    height: 10px; border-radius: 999px; background: var(--grey);
+    overflow: hidden;
+  }
+  .card.hero .goal-bar { background: rgba(255,255,255,0.12); }
+  .goal-fill {
+    height: 100%; border-radius: 999px;
+    background: var(--yellow);
+    transition: width 0.8s ease;
+  }
+  .goal-meta { display:flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600;}
+  .card.hero .goal-meta { color: #8a8a80; }
+
+  /* platform cards */
+  .plat-head { display: flex; align-items: center; gap: 10px; }
+  .plat-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--yellow-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .plat-name { font-weight: 700; font-size: 14px; }
+  .plat-num { font-size: 34px; font-weight: 800; margin-top: 10px; }
+  .plat-extra { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+  .spark { margin-top: 12px; height: 34px; width: 100%; }
+  .spark polyline { fill: none; stroke: var(--mustard); stroke-width: 2.5; stroke-linecap: round; }
+  .spark-note { font-size: 10px; color: #b3b3a8; margin-top: 6px; font-weight: 500; }
+
+  .chip {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .chip.live { background: #e3f6ea; color: var(--green); }
+  .chip.pending { background: var(--grey); color: var(--muted); }
+  .chip.manual { background: var(--yellow-soft); color: #8a6d00; }
+  .corner-chip { position: absolute; top: 16px; right: 16px; }
+
+  /* status footer */
+  .status-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+  .status-item {
+    background: var(--white); border-radius: 12px;
+    padding: 10px 16px; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 1px 2px rgba(16,23,3,0.05);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.on { background: var(--green); }
+  .dot.off { background: #d3d3ca; }
+  .status-note { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 14px; line-height: 1.6; }
+
+  footer {
+    text-align: center; padding: 22px; font-size: 11px; color: var(--muted); font-weight: 500;
+  }
+  footer b { color: var(--black); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">G</div>
+  <div>
+    <div class="logo-text">GOZAL <span>GROWTH</span></div>
+    <div class="header-sub">No fees. No middleman. Tap and go.</div>
+  </div>
+  <div class="header-right">
+    <div class="live-pill"><span class="live-dot"></span> AUTO-UPDATING</div>
+    <div class="updated" id="updated">loading…</div>
+  </div>
+</header>
+
+<main>
+
+  <h2>North Star — App Growth</h2>
+  <div class="grid g4" id="northstar"></div>
+
+  <h2>90-Day Goals</h2>
+  <div class="grid g3" id="goals"></div>
+
+  <h2>Audience by Platform</h2>
+  <div class="grid g4" id="platforms"></div>
+
+  <h2>Data Sources</h2>
+  <div class="status-wrap" id="status"></div>
+  <div class="status-note" id="status-note"></div>
+
+</main>
+
+<footer>
+  Data refreshes automatically every 6 hours via GitHub Actions ·
+  Built for the <b>Gozal</b> team · Trends appear as history accumulates
+</footer>
+
+<script>
+const GOALS = { downloads: 500, reviews_per_store: 50, followers: 1000 };
+
+const fmt = n => (n === null || n === undefined) ? "—" : n.toLocaleString();
+
+function stars(r) {
+  if (!r) return "";
+  const full = Math.round(r);
+  return "★".repeat(full) + "☆".repeat(5 - full);
+}
+
+function sparkline(points) {
+  if (!points || points.length < 2) {
+    return '<div class="spark-note">trend appears after a few updates</div>';
+  }
+  const w = 200, h = 34, pad = 3;
+  const min = Math.min(...points), max = Math.max(...points);
+  const span = (max - min) || 1;
+  const step = (w - pad * 2) / (points.length - 1);
+  const coords = points.map((v, i) =>
+    `${(pad + i * step).toFixed(1)},${(h - pad - ((v - min) / span) * (h - pad * 2)).toFixed(1)}`
+  ).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${coords}"/></svg>`;
+}
+
+function goalCard(title, current, target, subtitle) {
+  const pct = Math.min(100, Math.round((current / target) * 100));
+  return `<div class="card">
+    <div class="label">${title}</div>
+    <div class="big" style="font-size:32px">${fmt(current)} <span style="font-size:15px;color:var(--muted);font-weight:600">/ ${fmt(target)}</span></div>
+    <div class="goal">
+      <div class="goal-bar"><div class="goal-fill" style="width:${pct}%"></div></div>
+      <div class="goal-meta"><span>${pct}%</span><span>${subtitle}</span></div>
+    </div>
+  </div>`;
+}
+
+async function load() {
+  let m = {}, hist = [];
+  try { m = await (await fetch("data/metrics.json?t=" + Date.now())).json(); } catch(e) {}
+  try { hist = await (await fetch("data/history.json?t=" + Date.now())).json(); } catch(e) {}
+
+  const d = m.metrics || {};
+  const man = m.manual || {};
+  const st = m.status || {};
+
+  if (m.last_updated) {
+    document.getElementById("updated").textContent =
+      "Updated " + new Date(m.last_updated).toLocaleString();
+  }
+
+  const series = key => hist.map(x => x[key]).filter(v => v !== null && v !== undefined);
+
+  /* ── North star row ── */
+  const totalFollowers =
+    (d.tiktok_followers || 0) + (d.instagram_followers || 0) +
+    (d.youtube_subscribers || 0);
+
+  document.getElementById("northstar").innerHTML = `
+    <div class="card hero">
+      <span class="chip manual corner-chip">manual</span>
+      <div class="label">Android installs (lifetime)</div>
+      <div class="big">${fmt(man.android_installs_lifetime)}</div>
+      <div class="sub">as of ${man.android_installs_as_of || "—"} · auto-count pending access</div>
+    </div>
+    <div class="card">
+      <span class="chip pending corner-chip">pending</span>
+      <div class="label">iOS installs</div>
+      <div class="big" style="color:var(--muted)">—</div>
+      <div class="sub">unlocks with App Store finance access</div>
+    </div>
+    <div class="card">
+      <div class="label">App Store rating</div>
+      <div class="big" style="font-size:36px">${d.ios_rating ?? "—"} <span class="stars">${stars(d.ios_rating)}</span></div>
+      <div class="sub">${fmt(d.ios_ratings_count)} ratings</div>
+    </div>
+    <div class="card">
+      <div class="label">Google Play rating</div>
+      <div class="big" style="font-size:36px">${d.android_rating ?? "—"} <span class="stars">${stars(d.android_rating)}</span></div>
+      <div class="sub">${fmt(d.android_ratings_count)} reviews</div>
+    </div>`;
+
+  /* ── Goals ── */
+  const reviewsNow = Math.max(d.ios_ratings_count || 0, d.android_ratings_count || 0);
+  document.getElementById("goals").innerHTML =
+    goalCard("App downloads", man.android_installs_lifetime || 0, GOALS.downloads, "goal: 500 organic") +
+    goalCard("Store reviews (best store)", reviewsNow, GOALS.reviews_per_store, "goal: 50+ per store") +
+    goalCard("Combined followers", totalFollowers, GOALS.followers, "goal: 1,000");
+
+  /* ── Platforms ── */
+  const plats = [
+    { icon: "🎵", name: "TikTok", num: d.tiktok_followers, unit: "followers",
+      extra: `${fmt(d.tiktok_likes)} likes · ${fmt(d.tiktok_videos)} videos`,
+      spark: series("tiktok_followers"), live: st.tiktok },
+    { icon: "📸", name: "Instagram", num: d.instagram_followers, unit: "followers",
+      extra: `${fmt(d.instagram_posts)} posts`,
+      spark: series("instagram_followers"), live: st.instagram },
+    { icon: "▶️", name: "YouTube", num: d.youtube_subscribers, unit: "subscribers",
+      extra: `${fmt(d.youtube_videos)} videos`,
+      spark: series("youtube_subscribers"), live: st.youtube },
+    { icon: "👥", name: "Facebook", num: null, unit: "followers",
+      extra: "unlocks with Meta API setup",
+      spark: [], live: false },
+  ];
+  document.getElementById("platforms").innerHTML = plats.map(p => `
+    <div class="card">
+      <span class="chip ${p.live ? "live" : "pending"} corner-chip">${p.live ? "live" : "pending"}</span>
+      <div class="plat-head"><div class="plat-icon">${p.icon}</div><div class="plat-name">${p.name}</div></div>
+      <div class="plat-num">${fmt(p.num)}</div>
+      <div class="plat-extra">${p.unit} · ${p.extra}</div>
+      ${sparkline(p.spark)}
+    </div>`).join("");
+
+  /* ── Status ── */
+  const labels = {
+    app_store: "App Store rating", google_play: "Play rating", tiktok: "TikTok",
+    instagram: "Instagram", youtube: "YouTube", facebook: "Facebook",
+    ga4_website: "Website analytics", download_counts: "Download counts",
+  };
+  document.getElementById("status").innerHTML = Object.entries(labels).map(([k, v]) =>
+    `<div class="status-item"><span class="dot ${st[k] ? "on" : "off"}"></span>${v}</div>`
+  ).join("");
+  document.getElementById("status-note").textContent =
+    "Grey sources need access: Facebook + Instagram insights need a Meta developer token · " +
+    "Website analytics + Android download counts need Google admin approval · " +
+    "iOS download counts need the App Store vendor number (finance access).";
+}
+
+load();
+</script>
+</body>
+</html>
