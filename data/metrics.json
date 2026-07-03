@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-07-03T16:24:19+00:00",
+  "last_updated": "2026-07-03T17:05:55+00:00",
   "metrics": {
     "ios_rating": 4.5,
     "ios_ratings_count": 17,
@@ -7,9 +7,7 @@
     "android_ratings_count": 13,
     "tiktok_followers": 131,
     "tiktok_likes": 576,
-    "tiktok_videos": 100,
-    "instagram_followers": 28,
-    "instagram_posts": 123,
+    "tiktok_videos": 101,
     "youtube_subscribers": 14,
     "youtube_videos": 49
   },
@@ -23,7 +21,7 @@
     "app_store": true,
     "google_play": true,
     "tiktok": true,
-    "instagram": true,
+    "instagram": false,
     "youtube": true,
     "facebook": false,
     "ga4_website": false,
