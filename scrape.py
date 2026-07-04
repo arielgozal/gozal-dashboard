@@ -27,6 +27,7 @@ PLAY_PACKAGE = "com.gozal.app"
 TIKTOK_HANDLE = "gozalapp3"
 INSTAGRAM_HANDLE = "appgozalapp"
 YOUTUBE_HANDLE = "Gozal-app"
+FACEBOOK_PAGE_ID = "61583856832151"
 
 
 def _num(raw):
@@ -121,6 +122,25 @@ def instagram():
     return {"instagram_followers": _num(m.group(1))}
 
 
+def facebook():
+    """Facebook page follower count. Facebook usually serves a login wall to
+    non-browser requests, so this often returns nothing — the carry-forward
+    keeps the last browser-seeded value alive when that happens."""
+    r = requests.get(
+        f"https://www.facebook.com/profile.php?id={FACEBOOK_PAGE_ID}",
+        headers=UA, timeout=20,
+    )
+    r.raise_for_status()
+    out = {}
+    m = re.search(r'([\d,.]+[KM]?)\s+followers', r.text, re.I)
+    if m:
+        out["facebook_followers"] = _num(m.group(1))
+    m = re.search(r'([\d,.]+[KM]?)\s+likes', r.text, re.I)
+    if m:
+        out["facebook_likes"] = _num(m.group(1))
+    return out
+
+
 def youtube():
     r = requests.get(f"https://www.youtube.com/@{YOUTUBE_HANDLE}", headers=UA, timeout=20)
     r.raise_for_status()
@@ -140,6 +160,7 @@ SOURCE_KEYS = {
     "tiktok":      ["tiktok_followers", "tiktok_likes", "tiktok_videos"],
     "instagram":   ["instagram_followers", "instagram_posts"],
     "youtube":     ["youtube_subscribers", "youtube_videos"],
+    "facebook":    ["facebook_followers", "facebook_likes"],
 }
 
 
@@ -150,6 +171,7 @@ def main():
         "tiktok": tiktok,
         "instagram": instagram,
         "youtube": youtube,
+        "facebook": facebook,
     }
 
     # Last known values — a blocked scrape keeps yesterday's number instead of a hole
@@ -187,7 +209,6 @@ def main():
             print(f"  MISS {name}: carried forward {carried or 'nothing'}")
 
     # These need credentials or team access — see README
-    status["facebook"] = False
     status["ga4_website"] = False
     status["download_counts"] = False
 
