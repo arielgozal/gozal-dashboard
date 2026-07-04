@@ -23,6 +23,8 @@ jobs:
 
       - name: Collect metrics
         run: python scrape.py
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
 
       - name: Commit and push
         run: |

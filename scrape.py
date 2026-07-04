@@ -96,6 +96,32 @@ def tiktok():
     return out
 
 
+def _instagram_apify():
+    """Paid fallback (fractions of a cent per run): Apify's Instagram profile
+    scraper runs from IPs Instagram doesn't block. Used only when the free
+    public endpoints fail and an APIFY_TOKEN is configured."""
+    token = os.environ.get("APIFY_TOKEN")
+    if not token:
+        return {}
+    r = requests.post(
+        "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items",
+        params={"token": token, "timeout": 240},
+        json={"usernames": [INSTAGRAM_HANDLE]},
+        timeout=280,
+    )
+    r.raise_for_status()
+    items = r.json()
+    if not items or not isinstance(items, list):
+        return {}
+    p = items[0]
+    if p.get("followersCount") is None:
+        return {}
+    return {
+        "instagram_followers": p["followersCount"],
+        "instagram_posts": p.get("postsCount"),
+    }
+
+
 def instagram():
     try:
         r = requests.get(
@@ -114,12 +140,15 @@ def instagram():
                 }
     except requests.RequestException:
         pass
-    r = requests.get(f"https://www.instagram.com/{INSTAGRAM_HANDLE}/", headers=UA, timeout=20)
-    r.raise_for_status()
-    m = re.search(r'([\d,.]+[KM]?)\s+Followers', r.text)
-    if not m:
-        return {}
-    return {"instagram_followers": _num(m.group(1))}
+    try:
+        r = requests.get(f"https://www.instagram.com/{INSTAGRAM_HANDLE}/", headers=UA, timeout=20)
+        r.raise_for_status()
+        m = re.search(r'([\d,.]+[KM]?)\s+Followers', r.text)
+        if m:
+            return {"instagram_followers": _num(m.group(1))}
+    except requests.RequestException:
+        pass
+    return _instagram_apify()
 
 
 def facebook():
