@@ -196,16 +196,16 @@ def main():
             got = fn()
         except Exception as e:
             print(f"  FAIL {name}: {e}")
+        # keys the scrape didn't return this time keep their last known value
+        carried = {k: prev_metrics[k] for k in SOURCE_KEYS.get(name, [])
+                   if k in prev_metrics and k not in got}
+        data.update(carried)
+        data.update(got)
+        status[name] = bool(got or carried)
+        sources_updated[name] = now if got else prev_updated.get(name)
         if got:
-            data.update(got)
-            status[name] = True
-            sources_updated[name] = now
-            print(f"  OK   {name}: {got}")
+            print(f"  OK   {name}: {got}" + (f" (+carried {carried})" if carried else ""))
         else:
-            carried = {k: prev_metrics[k] for k in SOURCE_KEYS.get(name, []) if k in prev_metrics}
-            data.update(carried)
-            status[name] = bool(carried)
-            sources_updated[name] = prev_updated.get(name)
             print(f"  MISS {name}: carried forward {carried or 'nothing'}")
 
     # These need credentials or team access — see README
