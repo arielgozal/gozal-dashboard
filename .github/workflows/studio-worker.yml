@@ -1,0 +1,27 @@
+name: Studio worker
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # check the CREATE queue every 15 minutes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Process CREATE queue
+        run: python studio_worker.py
+        env:
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+          HF_API_SECRET: ${{ secrets.HF_API_SECRET }}
+          ENGINE_TEAM_KEY: ${{ secrets.ENGINE_TEAM_KEY }}
