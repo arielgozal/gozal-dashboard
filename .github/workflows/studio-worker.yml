@@ -6,12 +6,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write            # the Claude step commits generated image assets
+
+concurrency:
+  group: studio-worker
+  cancel-in-progress: false
 
 jobs:
   studio:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -19,9 +23,37 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Process CREATE queue
+      - name: Higgsfield video queue
+        id: hf
         run: python studio_worker.py
         env:
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
           HF_API_SECRET: ${{ secrets.HF_API_SECRET }}
+          ENGINE_TEAM_KEY: ${{ secrets.ENGINE_TEAM_KEY }}
+
+      - name: Install image toolchain + Poppins
+        if: steps.hf.outputs.claude_items != '0' && steps.hf.outputs.claude_items != ''
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q librsvg2-bin fontconfig
+          mkdir -p ~/.fonts
+          for w in Regular Medium SemiBold Bold ExtraBold Black; do
+            curl -sL "https://github.com/google/fonts/raw/main/ofl/poppins/Poppins-${w}.ttf" -o ~/.fonts/Poppins-${w}.ttf
+          done
+          fc-cache -f
+          fc-list | grep -i poppins | head -3
+
+      - uses: actions/setup-node@v4
+        if: steps.hf.outputs.claude_items != '0' && steps.hf.outputs.claude_items != ''
+        with:
+          node-version: '22'
+
+      - name: Claude studio (images + text)
+        if: steps.hf.outputs.claude_items != '0' && steps.hf.outputs.claude_items != ''
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          git config user.name "gozal-studio"
+          git config user.email "bot@gozalapp.com"
+          claude -p "$(cat agent/STUDIO.md)" --dangerously-skip-permissions
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           ENGINE_TEAM_KEY: ${{ secrets.ENGINE_TEAM_KEY }}

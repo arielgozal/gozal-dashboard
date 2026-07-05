@@ -9,7 +9,7 @@
 //                   approved, rejected, archived
 
 const VALID_STAGES = ["idea", "script", "create", "create_requested", "approve", "approved", "rejected", "archived"];
-const UPDATE_FIELDS = ["title", "hook", "notes", "caption", "scripts", "asset_url", "platforms", "audience", "pillar", "platform"];
+const UPDATE_FIELDS = ["title", "hook", "notes", "caption", "scripts", "asset_url", "asset_urls", "asset_type", "creator", "platforms", "audience", "pillar", "platform"];
 const RAW = "https://raw.githubusercontent.com/arielgozal/gozal-dashboard/main/data/";
 
 function authorized(ctx) {

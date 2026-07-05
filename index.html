@@ -572,16 +572,49 @@ function vScript() {
     </div>`;
 }
 
+const CREATORS = [
+  { id: "higgsfield", label: "🎬 Higgsfield video", desc: "AI video (Kling 3.0) — uses Higgsfield API credits" },
+  { id: "claude-image", label: "🖼 Claude images", desc: "Brand graphics: carousels, quote cards, checklists — free" },
+  { id: "text", label: "📝 Text only", desc: "Final post copy, no visuals" },
+];
+const VIDEO_PLATS = ["TikTok", "Instagram Reels", "YouTube Shorts"];
+
+function defaultCreator(it) {
+  const plats = (it.platforms && it.platforms.length) ? it.platforms : [it.platform];
+  return plats.some(p => VIDEO_PLATS.includes(p)) ? "higgsfield" : "claude-image";
+}
+
+async function setCreator(id, creator) {
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "update", id, fields: { creator } }) });
+    await loadState();
+    render(current());
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+function creatorPicker(it) {
+  const chosen = it.creator || defaultCreator(it);
+  return `<div style="margin-top:12px">
+    <div class="label" style="margin-bottom:8px">How should this be made? Your choice.</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${CREATORS.map(c => `<button class="btn ${c.id === chosen ? "primary" : "ghost"}" style="padding:7px 13px;font-size:11px"
+        title="${c.desc}" onclick="setCreator('${it.id}','${c.id}')">${c.label}</button>`).join("")}
+    </div>
+    <div class="meta" style="margin-top:6px">${CREATORS.find(c => c.id === chosen).desc}</div>
+  </div>`;
+}
+
 function vCreate() {
   const items = (PIPELINE.items || []).filter(i => i.stage === "create" || i.stage === "create_requested");
   return `
-    <div class="flow-note"><b>The hard rule:</b> only your explicit CREATE click queues generation. Nothing is ever generated on the engine's own initiative. Queued jobs are picked up by the studio worker (Higgsfield) and land on the Approve board.</div>
+    <div class="flow-note"><b>The hard rule:</b> only your explicit CREATE click queues generation, and you choose the maker per post: Higgsfield video, Claude-designed brand images, or plain text. Workers check the queue every 15 minutes and deliver to the Approve board.</div>
     <div class="grid g2">
       ${items.map(it => itemCard(it, it.stage === "create_requested"
           ? (INTERACTIVE ? liveBtn("Cancel request", `doMove('${it.id}','create')`) : "")
           : INTERACTIVE
             ? liveBtn("⚡ CREATE", `confirmCreate('${it.id}')`, true) + liveBtn("Back to Script", `doMove('${it.id}','script')`)
-            : lockedBtn("⚡ CREATE", true) + lockedBtn("Back to Script"))).join("")
+            : lockedBtn("⚡ CREATE", true) + lockedBtn("Back to Script"),
+        it.stage === "create" && INTERACTIVE ? creatorPicker(it) : "")).join("")
         || '<div class="empty"><b>Nothing staged for creation.</b><br>Approved scripts land here with their full generation scope for your sign-off.</div>'}
     </div>`;
 }
@@ -593,6 +626,7 @@ function packageText(it) {
   if (it.caption) out += `CAPTION:\n${it.caption}\n\n`;
   for (const p of plats) if (scripts[p]) out += `--- ${p.toUpperCase()} ---\n${scripts[p]}\n\n`;
   if (it.asset_url) out += `VIDEO FILE: ${it.asset_url}\n`;
+  if (it.asset_urls && it.asset_urls.length) out += `IMAGE FILES:\n${it.asset_urls.join("\n")}\n`;
   return out.trim();
 }
 
@@ -605,6 +639,13 @@ function deliverable(it) {
         <video controls preload="metadata" style="width:100%;max-width:280px;border-radius:14px;display:block;background:#000" src="${esc(it.asset_url)}"></video>
         <div class="btn-row">
           ${liveBtn("⬇ Download video", `downloadAsset('${esc(it.asset_url)}','${safeName}')`, true)}
+        </div>` : ""}
+      ${(it.asset_urls && it.asset_urls.length) ? `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          ${it.asset_urls.map((u, i) => `<a href="${esc(u)}" target="_blank"><img src="${esc(u)}" style="width:130px;border-radius:12px;display:block;box-shadow:var(--shadow)"></a>`).join("")}
+        </div>
+        <div class="btn-row">
+          ${it.asset_urls.map((u, i) => liveBtn(`⬇ Image ${i + 1}`, `downloadAsset('${esc(u)}','${safeName.replace(".mp4", "")}-${i + 1}.png')`, i === 0)).join("")}
         </div>` : ""}
       <div class="label" style="margin:12px 0 6px">Caption / post text — edit, then copy</div>
       <textarea id="${capId}" class="script-ta" placeholder="No caption yet — the social agent writes one on its next run, or paste your own.">${esc(it.caption || "")}</textarea>
