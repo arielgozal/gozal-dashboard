@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gozal — Growth Dashboard</title>
+<title>Gozal — Growth Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -22,565 +22,421 @@
     --red: #c0392b;
     --radius: 20px;
     --shadow: 0 1px 2px rgba(16,23,3,0.05), 0 4px 16px rgba(16,23,3,0.05);
-    --shadow-lift: 0 2px 4px rgba(16,23,3,0.06), 0 10px 28px rgba(16,23,3,0.10);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
   body {
     font-family: 'Poppins', -apple-system, sans-serif;
-    background: var(--beige);
-    color: var(--black);
-    min-height: 100vh;
+    background: var(--beige); color: var(--black);
+    display: flex; min-height: 100vh;
   }
 
-  /* ── Header ── */
-  header {
-    background: var(--black);
-    color: var(--white);
-    padding: 20px 28px 0;
+  /* ── Left rail ── */
+  aside {
+    width: 232px; flex-shrink: 0;
+    background: var(--black); color: var(--white);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
   }
-  .header-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 1240px; margin: 0 auto; }
+  .rail-logo { display: flex; align-items: center; gap: 12px; padding: 22px 20px 18px; }
   .logo-mark {
     background: var(--yellow); color: var(--black);
-    font-weight: 900; font-size: 24px;
-    width: 48px; height: 48px; border-radius: 14px;
+    font-weight: 900; font-size: 20px;
+    width: 42px; height: 42px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 0 0 3px rgba(253,203,21,0.25);
   }
-  .logo-text { font-weight: 800; font-size: 21px; letter-spacing: 0.5px; }
+  .logo-text { font-weight: 800; font-size: 16px; letter-spacing: .5px; }
   .logo-text span { color: var(--yellow); }
-  .header-sub { font-size: 12px; color: #b8b8ae; font-weight: 500; }
-  .header-right { margin-left: auto; text-align: right; }
-  .live-pill {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: rgba(253, 203, 21, 0.15); color: var(--yellow);
-    font-size: 12px; font-weight: 600;
-    padding: 6px 14px; border-radius: 999px;
+  .rail-sub { font-size: 10px; color: #8a8a80; font-weight: 500; margin-top: 2px; }
+
+  .rail-section { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #6b6b62; padding: 14px 20px 6px; }
+  nav.rail { flex: 1; overflow-y: auto; padding-bottom: 12px; }
+  .rail-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 16px; margin: 2px 10px; border-radius: 12px;
+    color: #b8b8ae; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; background: transparent; width: calc(100% - 20px);
+    font-family: inherit; text-align: left;
+    transition: background .15s, color .15s;
   }
-  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-  .updated { font-size: 11px; color: #8a8a80; margin-top: 5px; }
-
-  /* ── Tabs ── */
-  nav { max-width: 1240px; margin: 18px auto 0; display: flex; gap: 4px; overflow-x: auto; }
-  nav button {
-    font-family: inherit; font-size: 13px; font-weight: 600;
-    color: #b8b8ae; background: transparent; border: none;
-    padding: 12px 18px 14px; cursor: pointer; white-space: nowrap;
-    border-radius: 12px 12px 0 0;
-    transition: color .15s, background .15s;
-  }
-  nav button:hover { color: var(--white); }
-  nav button.active { background: var(--beige); color: var(--black); font-weight: 700; }
-
-  main { max-width: 1240px; margin: 0 auto; padding: 28px 24px 60px; }
-
-  h2 {
-    font-size: 12px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 2px;
-    color: var(--muted);
-    margin: 36px 0 14px;
-  }
-  h2:first-child { margin-top: 0; }
-
-  .grid { display: grid; gap: 16px; }
-  .g4 { grid-template-columns: repeat(4, 1fr); }
-  .g3 { grid-template-columns: repeat(3, 1fr); }
-  .g2 { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 960px) { .g4 { grid-template-columns: repeat(2,1fr);} .g3{grid-template-columns:1fr 1fr;} .g2{grid-template-columns:1fr;} }
-  @media (max-width: 560px) { .g4, .g3 { grid-template-columns: 1fr; } }
-
-  .card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 22px 24px;
-    box-shadow: var(--shadow);
-    position: relative;
-    overflow: hidden;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .card.click { cursor: pointer; }
-  .card.click:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-  .card.hero { background: var(--black); color: var(--white); }
-  .card.hero .label { color: #b8b8ae; }
-  .card.hero .big { color: var(--yellow); }
-  .card.hero .sub { color: #8a8a80; }
-
-  .label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
-  .big { font-size: 40px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
-  .sub { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 500; }
-
-  .delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-top: 8px; }
-  .delta.up   { background: #e3f6ea; color: var(--green); }
-  .delta.down { background: #fdeceb; color: var(--red); }
-  .delta.flat { background: var(--grey); color: var(--muted); }
-  .card.hero .delta.up { background: rgba(31,157,85,.25); color: #7fe0a8; }
-  .card.hero .delta.flat { background: rgba(255,255,255,.1); color: #b8b8ae; }
-
-  .stars { color: var(--mustard); font-size: 17px; letter-spacing: 2px; }
-  .card.hero .stars { color: var(--yellow); }
-
-  /* goal progress */
-  .goal { margin-top: 14px; }
-  .goal-bar { height: 12px; border-radius: 999px; background: var(--grey); overflow: hidden; }
-  .goal-fill {
-    height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, var(--mustard), var(--yellow));
-    transition: width 0.8s ease;
-  }
-  .goal-meta { display:flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 7px; font-weight: 600;}
-
-  /* platform snapshot cards */
-  .plat-head { display: flex; align-items: center; gap: 10px; }
-  .plat-icon {
-    width: 38px; height: 38px; border-radius: 12px;
-    background: var(--black); color: var(--yellow);
+  .rail-item:hover { color: var(--white); background: rgba(255,255,255,0.06); }
+  .rail-item.active { background: var(--yellow); color: var(--black); }
+  .step-no {
+    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+    background: rgba(255,255,255,0.1); color: #b8b8ae;
+    font-size: 11px; font-weight: 800;
     display: flex; align-items: center; justify-content: center;
   }
-  .plat-icon svg { width: 19px; height: 19px; fill: currentColor; }
-  .plat-name { font-weight: 700; font-size: 14px; }
-  .plat-num { font-size: 32px; font-weight: 800; margin-top: 10px; }
-  .plat-extra { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 3px; }
-
-  .chip {
-    display: inline-block; font-size: 10px; font-weight: 700;
-    padding: 4px 10px; border-radius: 999px;
-    text-transform: uppercase; letter-spacing: 0.8px;
+  .rail-item.active .step-no { background: var(--black); color: var(--yellow); }
+  .count {
+    margin-left: auto; font-size: 10px; font-weight: 800;
+    background: rgba(253,203,21,0.18); color: var(--yellow);
+    border-radius: 999px; padding: 2px 8px;
   }
-  .chip.live { background: #e3f6ea; color: var(--green); }
-  .chip.pending { background: var(--grey); color: var(--muted); }
-  .chip.manual, .chip.stale { background: var(--yellow-soft); color: #8a6d00; }
-  .corner-chip { position: absolute; top: 16px; right: 16px; }
+  .rail-item.active .count { background: var(--black); color: var(--yellow); }
+  .rail-foot { padding: 14px 16px 18px; }
+  .preview-pill {
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    background: rgba(253,203,21,0.14); color: var(--yellow);
+    border-radius: 10px; padding: 8px 12px; line-height: 1.5;
+  }
 
-  /* big charts */
-  .chart-card { padding-bottom: 14px; }
-  .chart-title { font-size: 13px; font-weight: 700; }
-  .chart-sub { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
-  .chart-empty {
-    height: 120px; display: flex; align-items: center; justify-content: center;
-    color: #b3b3a8; font-size: 12px; font-weight: 500;
+  /* ── Content ── */
+  .content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .topbar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 20px 28px 0;
+  }
+  .view-title { font-size: 22px; font-weight: 800; }
+  .view-sub { font-size: 12px; color: var(--muted); font-weight: 500; width: 100%; margin-top: 2px; }
+  .topbar-right { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 600; }
+  .viewport { padding: 20px 28px 60px; flex: 1; }
+
+  iframe.dataframe { width: 100%; border: none; border-radius: var(--radius); min-height: calc(100vh - 130px); background: var(--beige); }
+
+  h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin: 30px 0 14px; }
+  h2:first-child { margin-top: 0; }
+  .grid { display: grid; gap: 16px; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 1100px) { .g3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 760px) { .g3, .g2 { grid-template-columns: 1fr; } }
+
+  .card { background: var(--white); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); position: relative; }
+  .label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .big { font-size: 34px; font-weight: 800; margin-top: 4px; }
+  .sub { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+
+  .tag { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
+  .tag.vendor { background: var(--yellow); color: var(--black); }
+  .tag.consumer { background: var(--black); color: var(--yellow); }
+  .tag.pillar { background: var(--grey); color: var(--muted); }
+  .tag.platform { background: var(--yellow-soft); color: #8a6d00; }
+
+  .item-title { font-size: 16px; font-weight: 700; margin: 10px 0 6px; }
+  .hook { font-size: 13px; font-weight: 500; line-height: 1.6; color: var(--charcoal); background: var(--beige); border-left: 3px solid var(--yellow); padding: 10px 14px; border-radius: 0 10px 10px 0; margin: 10px 0; }
+  .meta { font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.6; }
+
+  .btn {
+    font-family: inherit; font-size: 12px; font-weight: 700;
+    border: none; border-radius: 999px; padding: 9px 18px; cursor: pointer;
+    background: var(--black); color: var(--yellow);
+    transition: transform .12s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--yellow); color: var(--black); }
+  .btn.ghost { background: var(--grey); color: var(--muted); }
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .locked { opacity: .55; cursor: not-allowed; }
+  .locked:hover { transform: none; }
+
+  .empty {
     background: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(16,23,3,.02) 10px 20px);
-    border-radius: 12px; margin-top: 12px;
+    border: 2px dashed #e2ddcc; border-radius: var(--radius);
+    padding: 34px 26px; text-align: center;
+    color: var(--muted); font-size: 13px; font-weight: 500; line-height: 1.8;
   }
-  .area { width: 100%; height: 150px; margin-top: 10px; display: block; }
-  .axis-label { font-size: 10px; fill: #b3b3a8; font-family: 'Poppins', sans-serif; font-weight: 500; }
+  .empty b { color: var(--black); }
 
-  /* detail page */
-  .detail-hero { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .detail-hero .plat-icon { width: 54px; height: 54px; border-radius: 16px; }
-  .detail-hero .plat-icon svg { width: 26px; height: 26px; }
-  .detail-title { font-size: 22px; font-weight: 800; }
-  .detail-link { font-size: 12px; color: var(--muted); font-weight: 500; text-decoration: none; }
-  .detail-link:hover { color: var(--black); text-decoration: underline; }
-  .back { font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; margin-bottom: 16px; display: inline-flex; gap: 6px; align-items: center; }
-  .back:hover { color: var(--black); }
+  /* weights */
+  .weight-row { display: flex; align-items: center; gap: 14px; margin: 14px 0; }
+  .weight-name { width: 190px; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .weight-bar { flex: 1; height: 14px; background: var(--grey); border-radius: 999px; overflow: hidden; }
+  .weight-fill { height: 100%; background: linear-gradient(90deg, var(--mustard), var(--yellow)); border-radius: 999px; }
+  .weight-val { width: 44px; text-align: right; font-size: 13px; font-weight: 800; }
 
-  .unlock {
-    background: var(--yellow-soft); border-radius: var(--radius);
-    padding: 18px 22px; font-size: 13px; font-weight: 500; line-height: 1.7;
+  /* signals table */
+  .posts-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .posts-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--grey); }
+  .posts-table td { padding: 10px; border-bottom: 1px solid var(--grey); font-weight: 500; vertical-align: top; }
+  .posts-table td.num { font-weight: 800; white-space: nowrap; }
+  .posts-table a { color: var(--black); font-weight: 600; }
+  .acct { font-weight: 800; text-transform: capitalize; }
+
+  .flow-note { background: var(--yellow-soft); border-radius: var(--radius); padding: 16px 20px; font-size: 12.5px; font-weight: 500; line-height: 1.7; margin-bottom: 20px; }
+  .flow-note b { font-weight: 700; }
+
+  .checklist td:first-child { font-weight: 700; white-space: nowrap; }
+  .status-chip { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; padding: 3px 10px; border-radius: 999px; background: var(--grey); color: var(--muted); }
+  .status-chip.bad { background: #fdeceb; color: var(--red); }
+  .status-chip.warn { background: var(--yellow-soft); color: #8a6d00; }
+
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--black); color: var(--yellow); font-size: 13px; font-weight: 600;
+    padding: 12px 22px; border-radius: 999px; box-shadow: 0 8px 30px rgba(16,23,3,.3);
+    transition: transform .25s ease; z-index: 50; pointer-events: none;
   }
-  .unlock b { font-weight: 700; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* status footer */
-  .status-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
-  .status-item {
-    background: var(--white); border-radius: 12px;
-    padding: 10px 16px; font-size: 12px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-    box-shadow: var(--shadow);
+  @media (max-width: 860px) {
+    body { flex-direction: column; }
+    aside { width: 100%; height: auto; position: static; }
+    nav.rail { display: flex; overflow-x: auto; padding: 0 6px 10px; }
+    .rail-item { flex-shrink: 0; width: auto; }
+    .count { margin-left: 8px; }
+    .rail-foot, .rail-section { display: none; }
   }
-  .dot { width: 8px; height: 8px; border-radius: 50%; }
-  .dot.on { background: var(--green); }
-  .dot.off { background: #d3d3ca; }
-  .status-note { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 14px; line-height: 1.7; }
-
-  footer { text-align: center; padding: 22px; font-size: 11px; color: var(--muted); font-weight: 500; }
-  footer b { color: var(--black); }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="header-top">
+<aside>
+  <div class="rail-logo">
     <div class="logo-mark">G</div>
     <div>
-      <div class="logo-text">GOZAL <span>GROWTH</span></div>
-      <div class="header-sub">No fees. No middleman. Tap and go.</div>
-    </div>
-    <div class="header-right">
-      <div class="live-pill"><span class="live-dot"></span> AUTO-UPDATING</div>
-      <div class="updated" id="updated">loading…</div>
+      <div class="logo-text">GOZAL <span>ENGINE</span></div>
+      <div class="rail-sub">No fees. No middleman.</div>
     </div>
   </div>
-  <nav id="tabs"></nav>
-</header>
+  <div class="rail-section">Pipeline</div>
+  <nav class="rail" id="rail"></nav>
+  <div class="rail-foot">
+    <div class="preview-pill">PREVIEW MODE<br><span style="color:#b8b8ae;font-weight:500">Boards are live-data. Action buttons unlock when the team app ships.</span></div>
+  </div>
+</aside>
 
-<main id="main"></main>
+<div class="content">
+  <div class="topbar">
+    <div>
+      <div class="view-title" id="vtitle"></div>
+      <div class="view-sub" id="vsub"></div>
+    </div>
+    <div class="topbar-right" id="vmeta"></div>
+  </div>
+  <div class="viewport" id="viewport"></div>
+</div>
 
-<footer>
-  Data refreshes automatically every 6 hours via GitHub Actions ·
-  Built for the <b>Gozal</b> team · Trends grow as history accumulates
-</footer>
+<div id="toast">Actions unlock when the team app goes live</div>
 
 <script>
-const GOALS = { downloads: 500, reviews_per_store: 50, followers: 1000 };
+const STAGES = [
+  { id: "data",    no: 1, name: "Data",              sub: "Every metric, every platform, auto-updated every 6 hours" },
+  { id: "signals", no: 2, name: "Signals",           sub: "What's working: competitor watch, grievances, trends. Promote a signal to Ideas." },
+  { id: "ideas",   no: 3, name: "Ideas",             sub: "Pick persona, platform and direction. Your weights steer the suggestions." },
+  { id: "script",  no: 4, name: "Script",            sub: "Scripts, shot lists and captions. Approve a script to move it to Create." },
+  { id: "create",  no: 5, name: "Create",            sub: "Full scope preview. One explicit CREATE fires Higgsfield. Nothing runs without it." },
+  { id: "approve", no: 6, name: "Approve & Publish", sub: "Your go/no-go. Nothing publishes without your click." },
+  { id: "aso",     no: 7, name: "ASO",               sub: "Store keywords, metadata drafts and asset rebuild tracker" },
+];
+const STAGE_OF_ITEM = { idea: "ideas", script: "script", create: "create", approve: "approve" };
 
-const ICONS = {
-  tiktok: '<svg viewBox="0 0 24 24"><path d="M19.6 7.2a5.6 5.6 0 0 1-3.4-1.1 5.6 5.6 0 0 1-2-3.1h-3v12.4a2.9 2.9 0 1 1-2.1-2.8V9.5a6 6 0 1 0 5.2 5.9V8.9a8.6 8.6 0 0 0 5.3 1.8Z"/></svg>',
-  instagram: '<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.9.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9-.1-1.3-.1-1.6-.1-4.8s0-3.6.1-4.8C2.4 4 4 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2Zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4Zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8Zm5.4-8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg>',
-  youtube: '<svg viewBox="0 0 24 24"><path d="M23 7.2a2.9 2.9 0 0 0-2-2C19.2 4.6 12 4.6 12 4.6s-7.2 0-9 .5a2.9 2.9 0 0 0-2 2A30 30 0 0 0 .5 12 30 30 0 0 0 1 16.8a2.9 2.9 0 0 0 2 2c1.8.5 9 .5 9 .5s7.2 0 9-.5a2.9 2.9 0 0 0 2-2A30 30 0 0 0 23.5 12 30 30 0 0 0 23 7.2ZM9.7 15.4V8.6l6 3.4Z"/></svg>',
-  facebook: '<svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.6-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12Z"/></svg>',
-  stores: '<svg viewBox="0 0 24 24"><path d="M12 1.8 2.4 5.4v6c0 5.6 4.1 10.8 9.6 12 5.5-1.2 9.6-6.4 9.6-12v-6ZM10 16.2l-3.6-3.6 1.4-1.4 2.2 2.2 5.8-5.8 1.4 1.4Z"/></svg>',
-};
-
-const PLATFORMS = {
-  tiktok: {
-    name: "TikTok", handle: "@gozalapp3", url: "https://www.tiktok.com/@gozalapp3", source: "tiktok",
-    primary: { key: "tiktok_followers", label: "Followers" },
-    metrics: [
-      { key: "tiktok_followers", label: "Followers" },
-      { key: "tiktok_likes", label: "Total likes" },
-      { key: "tiktok_videos", label: "Videos posted" },
-    ],
-    unlock: "Views, watch time and profile visits unlock with the TikTok Business API (application pending — takes 1–2 weeks).",
-  },
-  instagram: {
-    name: "Instagram", handle: "@appgozalapp", url: "https://www.instagram.com/appgozalapp/", source: "instagram",
-    primary: { key: "instagram_followers", label: "Followers" },
-    metrics: [
-      { key: "instagram_followers", label: "Followers" },
-      { key: "instagram_posts", label: "Posts" },
-    ],
-    unlock: "Reach, impressions and story metrics unlock with a free Meta developer token — Ariel can set this up without team permissions.",
-  },
-  youtube: {
-    name: "YouTube", handle: "@Gozal-app", url: "https://www.youtube.com/@Gozal-app", source: "youtube",
-    primary: { key: "youtube_subscribers", label: "Subscribers" },
-    metrics: [
-      { key: "youtube_subscribers", label: "Subscribers" },
-      { key: "youtube_videos", label: "Videos posted" },
-    ],
-    unlock: "View counts and watch time unlock with a free YouTube Data API key.",
-  },
-  facebook: {
-    name: "Facebook", handle: "Gozal App", url: "https://www.facebook.com/profile.php?id=61583856832151", source: "facebook",
-    primary: { key: "facebook_followers", label: "Followers" },
-    metrics: [
-      { key: "facebook_followers", label: "Followers" },
-      { key: "facebook_likes", label: "Page likes" },
-    ],
-    unlock: "Facebook blocks automated reading of pages, so this number is seeded from a manual check and carried forward. Post reach and engagement unlock with a free Meta developer token.",
-  },
-};
+let PIPELINE = { items: [] }, WEIGHTS = {}, SIGNALS = {}, ASO = {}, METRICS = {};
 
 const fmt = n => (n === null || n === undefined) ? "—" : n.toLocaleString();
+const toast = () => {
+  const t = document.getElementById("toast");
+  t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200);
+};
 
-function stars(r) {
-  if (!r) return "";
-  return "★".repeat(Math.round(r)) + "☆".repeat(5 - Math.round(r));
-}
-
-/* ── data ── */
-let M = {}, HIST = [];
-const d  = () => M.metrics || {};
-const man = () => M.manual || {};
-const st  = () => M.status || {};
-const su  = () => M.sources_updated || {};
-
-function freshness(name) {
-  if (!su()[name]) return st()[name] ? "live" : "pending";
-  return (Date.now() - new Date(su()[name]).getTime()) < 48 * 3600e3 ? "live" : "stale";
-}
-
-/* time series with timestamps */
-function series(key) {
-  return HIST.filter(x => x[key] !== null && x[key] !== undefined)
-             .map(x => ({ t: new Date(x.ts).getTime(), v: x[key] }));
-}
-
-/* change over the last 7 days (or whole history if shorter) */
-function delta7(key) {
-  const s = series(key);
-  if (s.length < 2) return null;
-  const cutoff = Date.now() - 7 * 86400e3;
-  let base = s[0];
-  for (const p of s) { if (p.t <= cutoff) base = p; else break; }
-  return s[s.length - 1].v - base.v;
-}
-
-function deltaChip(key, opts = {}) {
-  const dl = delta7(key);
-  if (dl === null) return `<span class="delta flat">tracking started</span>`;
-  if (dl === 0) return `<span class="delta flat">— no change this week</span>`;
-  const cls = dl > 0 ? "up" : "down";
-  const arrow = dl > 0 ? "▲" : "▼";
-  return `<span class="delta ${cls}">${arrow} ${dl > 0 ? "+" : ""}${fmt(dl)} ${opts.label || "this week"}</span>`;
-}
-
-/* ── SVG area chart ── */
-function areaChart(pts, { height = 150 } = {}) {
-  if (!pts || pts.length < 2) {
-    return `<div class="chart-empty">trend appears after a few more automatic updates</div>`;
+function counts() {
+  const c = {};
+  for (const it of (PIPELINE.items || [])) {
+    const s = STAGE_OF_ITEM[it.stage];
+    if (s) c[s] = (c[s] || 0) + 1;
   }
-  const w = 600, h = height, padL = 8, padR = 8, padT = 14, padB = 22;
-  const ts = pts.map(p => p.t), vs = pts.map(p => p.v);
-  const tMin = Math.min(...ts), tMax = Math.max(...ts) || tMin + 1;
-  const vMin = Math.min(...vs), vMax = Math.max(...vs);
-  const vSpan = (vMax - vMin) || 1;
-  const x = t => padL + ((t - tMin) / ((tMax - tMin) || 1)) * (w - padL - padR);
-  const y = v => padT + (1 - (v - vMin) / vSpan) * (h - padT - padB);
-  const line = pts.map(p => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
-  const area = `${padL},${h - padB} ${line} ${w - padR},${h - padB}`;
-  const dateFmt = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  const last = pts[pts.length - 1];
-  return `<svg class="area" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FDCB15" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#FDCB15" stop-opacity="0.02"/>
-    </linearGradient></defs>
-    <polygon points="${area}" fill="url(#ag)"/>
-    <polyline points="${line}" fill="none" stroke="#E4B616" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${x(last.t).toFixed(1)}" cy="${y(last.v).toFixed(1)}" r="4" fill="#101703" stroke="#FDCB15" stroke-width="2.5"/>
-    <text class="axis-label" x="${padL}" y="${h - 6}">${dateFmt(tMin)}</text>
-    <text class="axis-label" x="${w - padR}" y="${h - 6}" text-anchor="end">${dateFmt(tMax)}</text>
-    <text class="axis-label" x="${padL}" y="${padT - 3}">high ${fmt(vMax)}</text>
-  </svg>`;
+  return c;
 }
 
-function goalCard(title, current, target, subtitle) {
-  const pct = Math.min(100, Math.round(((current || 0) / target) * 100));
+function itemCard(it, actions) {
   return `<div class="card">
-    <div class="label">${title}</div>
-    <div class="big" style="font-size:30px">${fmt(current)} <span style="font-size:15px;color:var(--muted);font-weight:600">/ ${fmt(target)}</span></div>
-    <div class="goal">
-      <div class="goal-bar"><div class="goal-fill" style="width:${pct}%"></div></div>
-      <div class="goal-meta"><span>${pct}%</span><span>${subtitle}</span></div>
-    </div>
-  </div>`;
-}
-
-/* ── Overview tab ── */
-function renderOverview() {
-  const m = d(), mn = man();
-  const totalFollowers = (m.tiktok_followers || 0) + (m.instagram_followers || 0)
-    + (m.youtube_subscribers || 0) + (m.facebook_followers || 0);
-  const totalReviews = (m.ios_ratings_count || 0) + (m.android_ratings_count || 0);
-  const ratings = [m.ios_rating, m.android_rating].filter(Boolean);
-  const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b) / ratings.length).toFixed(1) : null;
-
-  /* combined follower history */
-  const combined = HIST.map(x => {
-    const v = (x.tiktok_followers || 0) + (x.instagram_followers || 0) + (x.youtube_subscribers || 0) + (x.facebook_followers || 0);
-    return { t: new Date(x.ts).getTime(), v };
-  }).filter(p => p.v > 0);
-  const combinedDelta = combined.length >= 2 ? combined[combined.length - 1].v - combined[0].v : null;
-
-  const reviewsBest = Math.max(m.ios_ratings_count || 0, m.android_ratings_count || 0);
-
-  return `
-  <h2>The numbers that matter</h2>
-  <div class="grid g4">
-    <div class="card hero">
-      <span class="chip manual corner-chip">manual</span>
-      <div class="label">App downloads</div>
-      <div class="big">${fmt(mn.android_installs_lifetime)}</div>
-      <div class="sub">Android lifetime · iOS pending finance access</div>
-    </div>
-    <div class="card click" onclick="go('tiktok')">
-      <div class="label">Combined followers</div>
-      <div class="big">${fmt(totalFollowers)}</div>
-      ${combinedDelta === null ? '<span class="delta flat">tracking started</span>'
-        : combinedDelta === 0 ? '<span class="delta flat">— no change this week</span>'
-        : `<span class="delta ${combinedDelta > 0 ? "up" : "down"}">${combinedDelta > 0 ? "▲ +" : "▼ "}${fmt(combinedDelta)} this week</span>`}
-      <div class="sub">TikTok + Instagram + YouTube + Facebook</div>
-    </div>
-    <div class="card click" onclick="go('stores')">
-      <div class="label">Average store rating</div>
-      <div class="big" style="font-size:36px">${avgRating ?? "—"} <span class="stars">${stars(avgRating)}</span></div>
-      <div class="sub">iOS ${m.ios_rating ?? "—"} · Play ${m.android_rating ?? "—"}</div>
-    </div>
-    <div class="card click" onclick="go('stores')">
-      <div class="label">Total store reviews</div>
-      <div class="big">${fmt(totalReviews)}</div>
-      ${deltaChip("ios_ratings_count")}
-      <div class="sub">${fmt(m.ios_ratings_count)} iOS · ${fmt(m.android_ratings_count)} Play</div>
-    </div>
-  </div>
-
-  <h2>90-day goals</h2>
-  <div class="grid g3">
-    ${goalCard("App downloads", mn.android_installs_lifetime, GOALS.downloads, "goal: 500 organic")}
-    ${goalCard("Store reviews (best store)", reviewsBest, GOALS.reviews_per_store, "goal: 50+ per store")}
-    ${goalCard("Combined followers", totalFollowers, GOALS.followers, "goal: 1,000")}
-  </div>
-
-  <h2>Audience growth</h2>
-  <div class="card chart-card">
-    <div class="chart-title">Combined followers over time</div>
-    <div class="chart-sub">All platforms added together · one point per automatic update</div>
-    ${areaChart(combined, { height: 170 })}
-  </div>
-
-  <h2>Platforms — click for detail</h2>
-  <div class="grid g4">
-    ${Object.entries(PLATFORMS).map(([id, p]) => {
-      const v = m[p.primary.key];
-      const state = freshness(p.source);
-      return `<div class="card click" onclick="go('${id}')">
-        <span class="chip ${state} corner-chip">${state}</span>
-        <div class="plat-head"><div class="plat-icon">${ICONS[id]}</div><div class="plat-name">${p.name}</div></div>
-        <div class="plat-num">${fmt(v)}</div>
-        <div class="plat-extra">${p.primary.label.toLowerCase()} · ${p.handle}</div>
-      </div>`;
-    }).join("")}
-  </div>
-
-  <h2>Data sources</h2>
-  <div class="status-wrap">
-    ${Object.entries({
-      app_store: "App Store rating", google_play: "Play rating", tiktok: "TikTok",
-      instagram: "Instagram", youtube: "YouTube", facebook: "Facebook",
-      ga4_website: "Website analytics", download_counts: "Download counts",
-    }).map(([k, v]) => `<div class="status-item"><span class="dot ${st()[k] ? "on" : "off"}"></span>${v}</div>`).join("")}
-  </div>
-  <div class="status-note">
-    Grey sources still need access: Website analytics + Android download counts need Google admin approval ·
-    iOS download counts need the App Store vendor number (finance access) ·
-    Facebook &amp; Instagram engagement metrics need a free Meta developer token.
-  </div>`;
-}
-
-/* ── Store tab ── */
-function renderStores() {
-  const m = d(), mn = man();
-  return `
-  <button class="back" onclick="go('overview')">← Back to overview</button>
-  <div class="detail-hero" style="margin-bottom:22px">
-    <div class="plat-icon">${ICONS.stores}</div>
     <div>
-      <div class="detail-title">App Stores</div>
-      <a class="detail-link" href="https://apps.apple.com/us/app/id6752485832" target="_blank">iOS App Store</a> ·
-      <a class="detail-link" href="https://play.google.com/store/apps/details?id=com.gozal.app" target="_blank">Google Play</a>
+      <span class="tag ${it.audience}">${it.audience}</span>
+      <span class="tag pillar">${it.pillar}</span>
+      <span class="tag platform">${it.platform}</span>
     </div>
-  </div>
-  <div class="grid g4">
-    <div class="card hero">
-      <span class="chip manual corner-chip">manual</span>
-      <div class="label">Android installs (lifetime)</div>
-      <div class="big">${fmt(mn.android_installs_lifetime)}</div>
-      <div class="sub">as of ${mn.android_installs_as_of || "—"}</div>
-    </div>
-    <div class="card">
-      <span class="chip pending corner-chip">pending</span>
-      <div class="label">iOS installs</div>
-      <div class="big" style="color:var(--muted)">—</div>
-      <div class="sub">unlocks with App Store finance access</div>
-    </div>
-    <div class="card">
-      <div class="label">App Store rating</div>
-      <div class="big" style="font-size:34px">${m.ios_rating ?? "—"} <span class="stars">${stars(m.ios_rating)}</span></div>
-      <div class="sub">${fmt(m.ios_ratings_count)} ratings</div>
-      ${deltaChip("ios_ratings_count", { label: "ratings this week" })}
-    </div>
-    <div class="card">
-      <div class="label">Google Play rating</div>
-      <div class="big" style="font-size:34px">${m.android_rating ?? "—"} <span class="stars">${stars(m.android_rating)}</span></div>
-      <div class="sub">${fmt(m.android_ratings_count)} reviews</div>
-      ${deltaChip("android_ratings_count", { label: "reviews this week" })}
-    </div>
-  </div>
-  <h2>Review growth</h2>
-  <div class="grid g2">
-    <div class="card chart-card">
-      <div class="chart-title">iOS ratings count</div>
-      ${areaChart(series("ios_ratings_count"))}
-    </div>
-    <div class="card chart-card">
-      <div class="chart-title">Play reviews count</div>
-      ${areaChart(series("android_ratings_count"))}
-    </div>
-  </div>
-  <h2>What unlocks more</h2>
-  <div class="unlock">
-    <b>iOS download counts</b> need the App Store vendor number (whoever holds Finance access in App Store Connect can read it in one click). ·
-    <b>Android download counts</b> need a Google Workspace admin to allow API access for the gozal-metrics service account.
+    <div class="item-title">${it.title}</div>
+    <div class="hook">"${it.hook}"</div>
+    <div class="meta"><b>Signal:</b> ${it.source_signal}<br>${it.notes || ""}</div>
+    <div class="btn-row">${actions}</div>
   </div>`;
 }
 
-/* ── Platform detail tab ── */
-function renderPlatform(id) {
-  const p = PLATFORMS[id];
-  const m = d();
-  const state = freshness(p.source);
-  const updatedAt = su()[p.source] ? new Date(su()[p.source]).toLocaleString() : null;
-  return `
-  <button class="back" onclick="go('overview')">← Back to overview</button>
-  <div class="detail-hero" style="margin-bottom:22px">
-    <div class="plat-icon">${ICONS[id]}</div>
-    <div>
-      <div class="detail-title">${p.name} <span class="chip ${state}" style="vertical-align:middle;margin-left:6px">${state}</span></div>
-      <a class="detail-link" href="${p.url}" target="_blank">${p.handle} ↗</a>
-      ${updatedAt ? `<span class="detail-link"> · data from ${updatedAt}</span>` : ""}
-    </div>
-  </div>
-  <div class="grid g3">
-    ${p.metrics.map(mt => `
-      <div class="card">
-        <div class="label">${mt.label}</div>
-        <div class="big" style="font-size:34px">${fmt(m[mt.key])}</div>
-        ${deltaChip(mt.key)}
-      </div>`).join("")}
-  </div>
-  <h2>Trends</h2>
-  <div class="grid g2">
-    ${p.metrics.map(mt => `
-      <div class="card chart-card">
-        <div class="chart-title">${mt.label}</div>
-        ${areaChart(series(mt.key))}
-      </div>`).join("")}
-  </div>
-  <h2>What unlocks more</h2>
-  <div class="unlock">${p.unlock}</div>`;
+const lockedBtn = (label, primary) =>
+  `<button class="btn ${primary ? "primary" : ""} locked" onclick="toast()">${label}</button>`;
+
+/* ── views ── */
+function vData() {
+  return `<iframe class="dataframe" src="data.html?embed=1"></iframe>`;
 }
 
-/* ── router ── */
-const TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "stores", label: "App Stores" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "instagram", label: "Instagram" },
-  { id: "youtube", label: "YouTube" },
-  { id: "facebook", label: "Facebook" },
-];
+function vSignals() {
+  const profiles = SIGNALS.competitor_profiles || [];
+  const posts = (SIGNALS.competitor_posts || []).slice(0, 12);
+  const gozal = METRICS.metrics || {};
+  const profCards = profiles.map(p => `
+    <div class="card">
+      <div class="label">@${p.handle} (TikTok)</div>
+      <div class="big" style="font-size:28px">${fmt(p.followers)} <span style="font-size:13px;color:var(--muted);font-weight:600">followers</span></div>
+      <div class="sub">${fmt(p.total_likes)} likes · ${fmt(p.videos)} videos</div>
+    </div>`).join("");
+  const rows = posts.map(p => `
+    <tr>
+      <td class="acct">${p.account}</td>
+      <td><a href="${p.url}" target="_blank">${p.text || "(no caption)"}</a></td>
+      <td class="num">${fmt(p.plays)}</td>
+      <td class="num">${fmt(p.likes)}</td>
+      <td>${p.posted ? new Date(p.posted).toLocaleDateString() : "—"}</td>
+      <td>${lockedBtn("→ Idea")}</td>
+    </tr>`).join("");
+  return `
+    <div class="flow-note"><b>The opening:</b> competitor accounts have big follower counts and tiny view counts. Their organic is defensive. The "vendors angry at lead fees" conversation on TikTok has no brand answering it. That lane is ours.</div>
+    <h2>Competitor accounts ${SIGNALS.generated_at ? `· refreshed ${new Date(SIGNALS.generated_at).toLocaleDateString()}` : ""}</h2>
+    <div class="grid g3">${profCards || '<div class="empty">First weekly competitor scrape lands Monday — or trigger it manually from GitHub Actions.</div>'}</div>
+    <h2>Their recent posts, ranked by views</h2>
+    <div class="card" style="overflow-x:auto">
+      <table class="posts-table">
+        <tr><th>Account</th><th>Post</th><th>Views</th><th>Likes</th><th>Posted</th><th></th></tr>
+        ${rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">no posts collected yet</td></tr>'}
+      </table>
+    </div>
+    <h2>Gozal, for contrast</h2>
+    <div class="grid g3">
+      <div class="card"><div class="label">TikTok followers</div><div class="big" style="font-size:28px">${fmt(gozal.tiktok_followers)}</div><div class="sub">small but growing — and our niche content out-engages their corporate feed per follower</div></div>
+      <div class="card"><div class="label">Grievance bank</div><div class="big" style="font-size:28px">9</div><div class="sub">real vendor quotes ready to become hooks (brand vault §7)</div></div>
+      <div class="card"><div class="label">Seasonal trigger</div><div class="big" style="font-size:22px">Hurricane season</div><div class="sub">surge demand for handymen + roofers = education content window</div></div>
+    </div>`;
+}
 
-function go(tab) {
-  location.hash = tab === "overview" ? "" : tab;
-  render(tab);
+function vIdeas() {
+  const w = WEIGHTS.weights || {};
+  const labels = {
+    own_performance: "Our own post performance",
+    competitor_intel: "Competitor intel",
+    vendor_grievances: "Vendor grievances",
+    trends_seasonal: "Trends & seasonal",
+  };
+  const sliders = Object.entries(labels).map(([k, name]) => `
+    <div class="weight-row">
+      <div class="weight-name">${name}</div>
+      <div class="weight-bar"><div class="weight-fill" style="width:${w[k] || 0}%"></div></div>
+      <div class="weight-val">${w[k] ?? 0}%</div>
+    </div>`).join("");
+  const items = (PIPELINE.items || []).filter(i => i.stage === "idea");
+  return `
+    <h2>Your weights — what steers tomorrow's suggestions</h2>
+    <div class="card">
+      ${sliders}
+      <div class="btn-row">${lockedBtn("Adjust weights", true)}<span class="meta" style="align-self:center">Sliders unlock with the team app. Until then, tell Claude and it updates same-day.</span></div>
+    </div>
+    <h2>Idea board · ${items.length} waiting</h2>
+    <div class="grid g2">
+      ${items.map(it => itemCard(it, lockedBtn("Choose direction → Script", true) + lockedBtn("Discard"))).join("")
+        || '<div class="empty"><b>No ideas queued.</b><br>Promote a signal from the Signals board or ask the ideation agent for a fresh batch.</div>'}
+    </div>`;
+}
+
+function vScript() {
+  const items = (PIPELINE.items || []).filter(i => i.stage === "script");
+  return `
+    <div class="flow-note"><b>How this stage works:</b> the script agent turns a chosen idea into a filming package: hook, shot list, captions, edit guide. Everything passes the humanizer gate before a VA ever sees it. Approving here moves it to Create.</div>
+    <div class="grid g2">
+      ${items.map(it => itemCard(it, lockedBtn("Approve script → Create", true) + lockedBtn("Regenerate") + lockedBtn("Back to Ideas"))).join("")
+        || '<div class="empty"><b>Nothing in scripting.</b><br>Choose a direction on the Ideas board and the script agent picks it up.</div>'}
+    </div>`;
+}
+
+function vCreate() {
+  const items = (PIPELINE.items || []).filter(i => i.stage === "create");
+  return `
+    <div class="flow-note"><b>The hard rule:</b> this board shows the full scope of what will be generated (format, length, style, credits) before anything runs. Only the explicit CREATE button fires Higgsfield. Nothing generates on its own.</div>
+    <div class="grid g2">
+      ${items.map(it => itemCard(it, lockedBtn("⚡ CREATE", true) + lockedBtn("Back to Script"))).join("")
+        || '<div class="empty"><b>Nothing staged for creation.</b><br>Approved scripts land here with their full generation scope for your sign-off.</div>'}
+    </div>`;
+}
+
+function vApprove() {
+  const items = (PIPELINE.items || []).filter(i => i.stage === "approve");
+  return `
+    <div class="flow-note"><b>Your gate.</b> Finished content waits here. Approve → queued to the chosen platforms. Reject → back to Script with your note. No exceptions, nothing publishes without your click.</div>
+    <div class="grid g2">
+      ${items.map(it => itemCard(it, lockedBtn("✓ Approve & publish", true) + lockedBtn("✗ Reject"))).join("")
+        || '<div class="empty"><b>Approval queue is empty.</b><br>Generated content appears here for your go/no-go before it touches any platform.</div>'}
+    </div>`;
+}
+
+function vAso() {
+  const kws = ASO.keyword_candidates || [];
+  const audit = ASO.asset_audit || [];
+  const md = ASO.metadata_drafts || {};
+  const m = METRICS.metrics || {};
+  const chip = s => s === "missing" || s === "needs rebuild" || s === "needs rewrite"
+    ? `<span class="status-chip bad">${s}</span>`
+    : s === "review" ? `<span class="status-chip warn">${s}</span>` : `<span class="status-chip">${s}</span>`;
+  return `
+    <h2>Where the stores stand</h2>
+    <div class="grid g3">
+      <div class="card"><div class="label">App Store</div><div class="big" style="font-size:28px">${m.ios_rating ?? "—"}★</div><div class="sub">${fmt(m.ios_ratings_count)} ratings · goal 50+</div></div>
+      <div class="card"><div class="label">Google Play</div><div class="big" style="font-size:28px">${m.android_rating ?? "—"}★</div><div class="sub">${fmt(m.android_ratings_count)} reviews · goal 50+</div></div>
+      <div class="card"><div class="label">Listing status</div><div class="big" style="font-size:20px">Needs rebuild</div><div class="sub">${ASO.status || ""}</div></div>
+    </div>
+    <h2>Keyword candidates (draft)</h2>
+    <div class="card" style="overflow-x:auto">
+      <table class="posts-table">
+        <tr><th>Keyword</th><th>Intent</th><th>Notes</th></tr>
+        ${kws.map(k => `<tr><td style="font-weight:700">${k.keyword}</td><td><span class="tag pillar">${k.intent}</span></td><td>${k.notes || ""}</td></tr>`).join("")}
+      </table>
+      <div class="btn-row">${lockedBtn("Run full keyword research", true)}</div>
+    </div>
+    <h2>Metadata drafts</h2>
+    <div class="card">
+      <div class="meta" style="font-size:13px;line-height:2">
+        <b>iOS title:</b> ${md.ios_title || "—"}<br>
+        <b>iOS subtitle:</b> ${md.ios_subtitle || "—"}<br>
+        <b>Play short description:</b> ${md.play_short_description || "—"}<br>
+        <span class="status-chip warn">${md.status || "draft"}</span>
+      </div>
+    </div>
+    <h2>Asset rebuild tracker</h2>
+    <div class="card" style="overflow-x:auto">
+      <table class="posts-table checklist">
+        <tr><th>Asset</th><th>Status</th><th>Direction</th></tr>
+        ${audit.map(a => `<tr><td>${a.item}</td><td>${chip(a.status)}</td><td>${a.note}</td></tr>`).join("")}
+      </table>
+    </div>`;
+}
+
+const VIEWS = { data: vData, signals: vSignals, ideas: vIdeas, script: vScript, create: vCreate, approve: vApprove, aso: vAso };
+
+function renderRail(active) {
+  const c = counts();
+  document.getElementById("rail").innerHTML = STAGES.map(s => `
+    <button class="rail-item ${s.id === active ? "active" : ""}" onclick="go('${s.id}')">
+      <span class="step-no">${s.no}</span> ${s.name}
+      ${c[s.id] ? `<span class="count">${c[s.id]}</span>` : ""}
+    </button>`).join("");
+}
+
+function go(id) {
+  location.hash = id === "data" ? "" : id;
+  render(id);
+}
+
+function render(id) {
+  const stage = STAGES.find(s => s.id === id) || STAGES[0];
+  renderRail(stage.id);
+  document.getElementById("vtitle").textContent = stage.name;
+  document.getElementById("vsub").textContent = stage.sub;
+  document.getElementById("vmeta").textContent = METRICS.last_updated
+    ? "Data updated " + new Date(METRICS.last_updated).toLocaleString() : "";
+  document.getElementById("viewport").innerHTML = VIEWS[stage.id]();
   window.scrollTo({ top: 0 });
 }
 
-function render(tab) {
-  document.getElementById("tabs").innerHTML = TABS.map(t =>
-    `<button class="${t.id === tab ? "active" : ""}" onclick="go('${t.id}')">${t.label}</button>`
-  ).join("");
-  const el = document.getElementById("main");
-  if (tab === "overview") el.innerHTML = renderOverview();
-  else if (tab === "stores") el.innerHTML = renderStores();
-  else if (PLATFORMS[tab]) el.innerHTML = renderPlatform(tab);
-  else el.innerHTML = renderOverview();
-}
-
 async function load() {
-  try { M = await (await fetch("data/metrics.json?t=" + Date.now())).json(); } catch (e) {}
-  try { HIST = await (await fetch("data/history.json?t=" + Date.now())).json(); } catch (e) {}
-  if (M.last_updated) {
-    document.getElementById("updated").textContent =
-      "Updated " + new Date(M.last_updated).toLocaleString();
-  }
-  render(location.hash.replace("#", "") || "overview");
+  const get = async (path, fallback) => {
+    try { return await (await fetch(path + "?t=" + Date.now())).json(); } catch (e) { return fallback; }
+  };
+  [METRICS, PIPELINE, WEIGHTS, SIGNALS, ASO] = await Promise.all([
+    get("data/metrics.json", {}), get("data/pipeline.json", { items: [] }),
+    get("data/weights.json", {}), get("data/signals.json", {}), get("data/aso.json", {}),
+  ]);
+  render(location.hash.replace("#", "") || "data");
 }
 
-window.addEventListener("hashchange", () => render(location.hash.replace("#", "") || "overview"));
+window.addEventListener("hashchange", () => render(location.hash.replace("#", "") || "data"));
 load();
 </script>
 </body>

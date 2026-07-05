@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gozal — Growth Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FDCB15;
+    --yellow-soft: #FFF3B0;
+    --mustard: #E4B616;
+    --black: #101703;
+    --charcoal: #2C2C2C;
+    --beige: #FAF5E6;
+    --grey: #EEF2F4;
+    --white: #FFFFFF;
+    --muted: #7a7a72;
+    --green: #1f9d55;
+    --red: #c0392b;
+    --radius: 20px;
+    --shadow: 0 1px 2px rgba(16,23,3,0.05), 0 4px 16px rgba(16,23,3,0.05);
+    --shadow-lift: 0 2px 4px rgba(16,23,3,0.06), 0 10px 28px rgba(16,23,3,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Poppins', -apple-system, sans-serif;
+    background: var(--beige);
+    color: var(--black);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--black);
+    color: var(--white);
+    padding: 20px 28px 0;
+  }
+  .header-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 1240px; margin: 0 auto; }
+  .logo-mark {
+    background: var(--yellow); color: var(--black);
+    font-weight: 900; font-size: 24px;
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 3px rgba(253,203,21,0.25);
+  }
+  .logo-text { font-weight: 800; font-size: 21px; letter-spacing: 0.5px; }
+  .logo-text span { color: var(--yellow); }
+  .header-sub { font-size: 12px; color: #b8b8ae; font-weight: 500; }
+  .header-right { margin-left: auto; text-align: right; }
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(253, 203, 21, 0.15); color: var(--yellow);
+    font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .updated { font-size: 11px; color: #8a8a80; margin-top: 5px; }
+
+  /* ── Tabs ── */
+  nav { max-width: 1240px; margin: 18px auto 0; display: flex; gap: 4px; overflow-x: auto; }
+  nav button {
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    color: #b8b8ae; background: transparent; border: none;
+    padding: 12px 18px 14px; cursor: pointer; white-space: nowrap;
+    border-radius: 12px 12px 0 0;
+    transition: color .15s, background .15s;
+  }
+  nav button:hover { color: var(--white); }
+  nav button.active { background: var(--beige); color: var(--black); font-weight: 700; }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  h2 {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--muted);
+    margin: 36px 0 14px;
+  }
+  h2:first-child { margin-top: 0; }
+
+  .grid { display: grid; gap: 16px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 960px) { .g4 { grid-template-columns: repeat(2,1fr);} .g3{grid-template-columns:1fr 1fr;} .g2{grid-template-columns:1fr;} }
+  @media (max-width: 560px) { .g4, .g3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card.click { cursor: pointer; }
+  .card.click:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  .card.hero { background: var(--black); color: var(--white); }
+  .card.hero .label { color: #b8b8ae; }
+  .card.hero .big { color: var(--yellow); }
+  .card.hero .sub { color: #8a8a80; }
+
+  .label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
+  .big { font-size: 40px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
+  .sub { font-size: 12px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+
+  .delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-top: 8px; }
+  .delta.up   { background: #e3f6ea; color: var(--green); }
+  .delta.down { background: #fdeceb; color: var(--red); }
+  .delta.flat { background: var(--grey); color: var(--muted); }
+  .card.hero .delta.up { background: rgba(31,157,85,.25); color: #7fe0a8; }
+  .card.hero .delta.flat { background: rgba(255,255,255,.1); color: #b8b8ae; }
+
+  .stars { color: var(--mustard); font-size: 17px; letter-spacing: 2px; }
+  .card.hero .stars { color: var(--yellow); }
+
+  /* goal progress */
+  .goal { margin-top: 14px; }
+  .goal-bar { height: 12px; border-radius: 999px; background: var(--grey); overflow: hidden; }
+  .goal-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--mustard), var(--yellow));
+    transition: width 0.8s ease;
+  }
+  .goal-meta { display:flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 7px; font-weight: 600;}
+
+  /* platform snapshot cards */
+  .plat-head { display: flex; align-items: center; gap: 10px; }
+  .plat-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: var(--black); color: var(--yellow);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .plat-icon svg { width: 19px; height: 19px; fill: currentColor; }
+  .plat-name { font-weight: 700; font-size: 14px; }
+  .plat-num { font-size: 32px; font-weight: 800; margin-top: 10px; }
+  .plat-extra { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+
+  .chip {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .chip.live { background: #e3f6ea; color: var(--green); }
+  .chip.pending { background: var(--grey); color: var(--muted); }
+  .chip.manual, .chip.stale { background: var(--yellow-soft); color: #8a6d00; }
+  .corner-chip { position: absolute; top: 16px; right: 16px; }
+
+  /* big charts */
+  .chart-card { padding-bottom: 14px; }
+  .chart-title { font-size: 13px; font-weight: 700; }
+  .chart-sub { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+  .chart-empty {
+    height: 120px; display: flex; align-items: center; justify-content: center;
+    color: #b3b3a8; font-size: 12px; font-weight: 500;
+    background: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(16,23,3,.02) 10px 20px);
+    border-radius: 12px; margin-top: 12px;
+  }
+  .area { width: 100%; height: 150px; margin-top: 10px; display: block; }
+  .axis-label { font-size: 10px; fill: #b3b3a8; font-family: 'Poppins', sans-serif; font-weight: 500; }
+
+  /* detail page */
+  .detail-hero { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .detail-hero .plat-icon { width: 54px; height: 54px; border-radius: 16px; }
+  .detail-hero .plat-icon svg { width: 26px; height: 26px; }
+  .detail-title { font-size: 22px; font-weight: 800; }
+  .detail-link { font-size: 12px; color: var(--muted); font-weight: 500; text-decoration: none; }
+  .detail-link:hover { color: var(--black); text-decoration: underline; }
+  .back { font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; background: none; border: none; font-family: inherit; padding: 0; margin-bottom: 16px; display: inline-flex; gap: 6px; align-items: center; }
+  .back:hover { color: var(--black); }
+
+  .unlock {
+    background: var(--yellow-soft); border-radius: var(--radius);
+    padding: 18px 22px; font-size: 13px; font-weight: 500; line-height: 1.7;
+  }
+  .unlock b { font-weight: 700; }
+
+  /* status footer */
+  .status-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+  .status-item {
+    background: var(--white); border-radius: 12px;
+    padding: 10px 16px; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.on { background: var(--green); }
+  .dot.off { background: #d3d3ca; }
+  .status-note { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 14px; line-height: 1.7; }
+
+  footer { text-align: center; padding: 22px; font-size: 11px; color: var(--muted); font-weight: 500; }
+  footer b { color: var(--black); }
+  /* embedded inside the engine shell: shell provides the chrome, tabs stay */
+  body.embed .header-top, body.embed footer { display: none; }
+  body.embed header { padding-top: 6px; }
+  body.embed main { padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-mark">G</div>
+    <div>
+      <div class="logo-text">GOZAL <span>GROWTH</span></div>
+      <div class="header-sub">No fees. No middleman. Tap and go.</div>
+    </div>
+    <div class="header-right">
+      <div class="live-pill"><span class="live-dot"></span> AUTO-UPDATING</div>
+      <div class="updated" id="updated">loading…</div>
+    </div>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  Data refreshes automatically every 6 hours via GitHub Actions ·
+  Built for the <b>Gozal</b> team · Trends grow as history accumulates
+</footer>
+
+<script>
+const GOALS = { downloads: 500, reviews_per_store: 50, followers: 1000 };
+
+const ICONS = {
+  tiktok: '<svg viewBox="0 0 24 24"><path d="M19.6 7.2a5.6 5.6 0 0 1-3.4-1.1 5.6 5.6 0 0 1-2-3.1h-3v12.4a2.9 2.9 0 1 1-2.1-2.8V9.5a6 6 0 1 0 5.2 5.9V8.9a8.6 8.6 0 0 0 5.3 1.8Z"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.9.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9-.1-1.3-.1-1.6-.1-4.8s0-3.6.1-4.8C2.4 4 4 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2Zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4Zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8Zm5.4-8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24"><path d="M23 7.2a2.9 2.9 0 0 0-2-2C19.2 4.6 12 4.6 12 4.6s-7.2 0-9 .5a2.9 2.9 0 0 0-2 2A30 30 0 0 0 .5 12 30 30 0 0 0 1 16.8a2.9 2.9 0 0 0 2 2c1.8.5 9 .5 9 .5s7.2 0 9-.5a2.9 2.9 0 0 0 2-2A30 30 0 0 0 23.5 12 30 30 0 0 0 23 7.2ZM9.7 15.4V8.6l6 3.4Z"/></svg>',
+  facebook: '<svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.6-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12Z"/></svg>',
+  stores: '<svg viewBox="0 0 24 24"><path d="M12 1.8 2.4 5.4v6c0 5.6 4.1 10.8 9.6 12 5.5-1.2 9.6-6.4 9.6-12v-6ZM10 16.2l-3.6-3.6 1.4-1.4 2.2 2.2 5.8-5.8 1.4 1.4Z"/></svg>',
+};
+
+const PLATFORMS = {
+  tiktok: {
+    name: "TikTok", handle: "@gozalapp3", url: "https://www.tiktok.com/@gozalapp3", source: "tiktok",
+    primary: { key: "tiktok_followers", label: "Followers" },
+    metrics: [
+      { key: "tiktok_followers", label: "Followers" },
+      { key: "tiktok_likes", label: "Total likes" },
+      { key: "tiktok_videos", label: "Videos posted" },
+    ],
+    unlock: "Views, watch time and profile visits unlock with the TikTok Business API (application pending — takes 1–2 weeks).",
+  },
+  instagram: {
+    name: "Instagram", handle: "@appgozalapp", url: "https://www.instagram.com/appgozalapp/", source: "instagram",
+    primary: { key: "instagram_followers", label: "Followers" },
+    metrics: [
+      { key: "instagram_followers", label: "Followers" },
+      { key: "instagram_posts", label: "Posts" },
+    ],
+    unlock: "Reach, impressions and story metrics unlock with a free Meta developer token — Ariel can set this up without team permissions.",
+  },
+  youtube: {
+    name: "YouTube", handle: "@Gozal-app", url: "https://www.youtube.com/@Gozal-app", source: "youtube",
+    primary: { key: "youtube_subscribers", label: "Subscribers" },
+    metrics: [
+      { key: "youtube_subscribers", label: "Subscribers" },
+      { key: "youtube_videos", label: "Videos posted" },
+    ],
+    unlock: "View counts and watch time unlock with a free YouTube Data API key.",
+  },
+  facebook: {
+    name: "Facebook", handle: "Gozal App", url: "https://www.facebook.com/profile.php?id=61583856832151", source: "facebook",
+    primary: { key: "facebook_followers", label: "Followers" },
+    metrics: [
+      { key: "facebook_followers", label: "Followers" },
+      { key: "facebook_likes", label: "Page likes" },
+    ],
+    unlock: "Facebook blocks automated reading of pages, so this number is seeded from a manual check and carried forward. Post reach and engagement unlock with a free Meta developer token.",
+  },
+};
+
+const fmt = n => (n === null || n === undefined) ? "—" : n.toLocaleString();
+
+function stars(r) {
+  if (!r) return "";
+  return "★".repeat(Math.round(r)) + "☆".repeat(5 - Math.round(r));
+}
+
+/* ── data ── */
+let M = {}, HIST = [];
+const d  = () => M.metrics || {};
+const man = () => M.manual || {};
+const st  = () => M.status || {};
+const su  = () => M.sources_updated || {};
+
+function freshness(name) {
+  if (!su()[name]) return st()[name] ? "live" : "pending";
+  return (Date.now() - new Date(su()[name]).getTime()) < 48 * 3600e3 ? "live" : "stale";
+}
+
+/* time series with timestamps */
+function series(key) {
+  return HIST.filter(x => x[key] !== null && x[key] !== undefined)
+             .map(x => ({ t: new Date(x.ts).getTime(), v: x[key] }));
+}
+
+/* change over the last 7 days (or whole history if shorter) */
+function delta7(key) {
+  const s = series(key);
+  if (s.length < 2) return null;
+  const cutoff = Date.now() - 7 * 86400e3;
+  let base = s[0];
+  for (const p of s) { if (p.t <= cutoff) base = p; else break; }
+  return s[s.length - 1].v - base.v;
+}
+
+function deltaChip(key, opts = {}) {
+  const dl = delta7(key);
+  if (dl === null) return `<span class="delta flat">tracking started</span>`;
+  if (dl === 0) return `<span class="delta flat">— no change this week</span>`;
+  const cls = dl > 0 ? "up" : "down";
+  const arrow = dl > 0 ? "▲" : "▼";
+  return `<span class="delta ${cls}">${arrow} ${dl > 0 ? "+" : ""}${fmt(dl)} ${opts.label || "this week"}</span>`;
+}
+
+/* ── SVG area chart ── */
+function areaChart(pts, { height = 150 } = {}) {
+  if (!pts || pts.length < 2) {
+    return `<div class="chart-empty">trend appears after a few more automatic updates</div>`;
+  }
+  const w = 600, h = height, padL = 8, padR = 8, padT = 14, padB = 22;
+  const ts = pts.map(p => p.t), vs = pts.map(p => p.v);
+  const tMin = Math.min(...ts), tMax = Math.max(...ts) || tMin + 1;
+  const vMin = Math.min(...vs), vMax = Math.max(...vs);
+  const vSpan = (vMax - vMin) || 1;
+  const x = t => padL + ((t - tMin) / ((tMax - tMin) || 1)) * (w - padL - padR);
+  const y = v => padT + (1 - (v - vMin) / vSpan) * (h - padT - padB);
+  const line = pts.map(p => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const area = `${padL},${h - padB} ${line} ${w - padR},${h - padB}`;
+  const dateFmt = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const last = pts[pts.length - 1];
+  return `<svg class="area" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDCB15" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#FDCB15" stop-opacity="0.02"/>
+    </linearGradient></defs>
+    <polygon points="${area}" fill="url(#ag)"/>
+    <polyline points="${line}" fill="none" stroke="#E4B616" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${x(last.t).toFixed(1)}" cy="${y(last.v).toFixed(1)}" r="4" fill="#101703" stroke="#FDCB15" stroke-width="2.5"/>
+    <text class="axis-label" x="${padL}" y="${h - 6}">${dateFmt(tMin)}</text>
+    <text class="axis-label" x="${w - padR}" y="${h - 6}" text-anchor="end">${dateFmt(tMax)}</text>
+    <text class="axis-label" x="${padL}" y="${padT - 3}">high ${fmt(vMax)}</text>
+  </svg>`;
+}
+
+function goalCard(title, current, target, subtitle) {
+  const pct = Math.min(100, Math.round(((current || 0) / target) * 100));
+  return `<div class="card">
+    <div class="label">${title}</div>
+    <div class="big" style="font-size:30px">${fmt(current)} <span style="font-size:15px;color:var(--muted);font-weight:600">/ ${fmt(target)}</span></div>
+    <div class="goal">
+      <div class="goal-bar"><div class="goal-fill" style="width:${pct}%"></div></div>
+      <div class="goal-meta"><span>${pct}%</span><span>${subtitle}</span></div>
+    </div>
+  </div>`;
+}
+
+/* ── Overview tab ── */
+function renderOverview() {
+  const m = d(), mn = man();
+  const totalFollowers = (m.tiktok_followers || 0) + (m.instagram_followers || 0)
+    + (m.youtube_subscribers || 0) + (m.facebook_followers || 0);
+  const totalReviews = (m.ios_ratings_count || 0) + (m.android_ratings_count || 0);
+  const ratings = [m.ios_rating, m.android_rating].filter(Boolean);
+  const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b) / ratings.length).toFixed(1) : null;
+
+  /* combined follower history */
+  const combined = HIST.map(x => {
+    const v = (x.tiktok_followers || 0) + (x.instagram_followers || 0) + (x.youtube_subscribers || 0) + (x.facebook_followers || 0);
+    return { t: new Date(x.ts).getTime(), v };
+  }).filter(p => p.v > 0);
+  const combinedDelta = combined.length >= 2 ? combined[combined.length - 1].v - combined[0].v : null;
+
+  const reviewsBest = Math.max(m.ios_ratings_count || 0, m.android_ratings_count || 0);
+
+  return `
+  <h2>The numbers that matter</h2>
+  <div class="grid g4">
+    <div class="card hero">
+      <span class="chip manual corner-chip">manual</span>
+      <div class="label">App downloads</div>
+      <div class="big">${fmt(mn.android_installs_lifetime)}</div>
+      <div class="sub">Android lifetime · iOS pending finance access</div>
+    </div>
+    <div class="card click" onclick="go('tiktok')">
+      <div class="label">Combined followers</div>
+      <div class="big">${fmt(totalFollowers)}</div>
+      ${combinedDelta === null ? '<span class="delta flat">tracking started</span>'
+        : combinedDelta === 0 ? '<span class="delta flat">— no change this week</span>'
+        : `<span class="delta ${combinedDelta > 0 ? "up" : "down"}">${combinedDelta > 0 ? "▲ +" : "▼ "}${fmt(combinedDelta)} this week</span>`}
+      <div class="sub">TikTok + Instagram + YouTube + Facebook</div>
+    </div>
+    <div class="card click" onclick="go('stores')">
+      <div class="label">Average store rating</div>
+      <div class="big" style="font-size:36px">${avgRating ?? "—"} <span class="stars">${stars(avgRating)}</span></div>
+      <div class="sub">iOS ${m.ios_rating ?? "—"} · Play ${m.android_rating ?? "—"}</div>
+    </div>
+    <div class="card click" onclick="go('stores')">
+      <div class="label">Total store reviews</div>
+      <div class="big">${fmt(totalReviews)}</div>
+      ${deltaChip("ios_ratings_count")}
+      <div class="sub">${fmt(m.ios_ratings_count)} iOS · ${fmt(m.android_ratings_count)} Play</div>
+    </div>
+  </div>
+
+  <h2>90-day goals</h2>
+  <div class="grid g3">
+    ${goalCard("App downloads", mn.android_installs_lifetime, GOALS.downloads, "goal: 500 organic")}
+    ${goalCard("Store reviews (best store)", reviewsBest, GOALS.reviews_per_store, "goal: 50+ per store")}
+    ${goalCard("Combined followers", totalFollowers, GOALS.followers, "goal: 1,000")}
+  </div>
+
+  <h2>Audience growth</h2>
+  <div class="card chart-card">
+    <div class="chart-title">Combined followers over time</div>
+    <div class="chart-sub">All platforms added together · one point per automatic update</div>
+    ${areaChart(combined, { height: 170 })}
+  </div>
+
+  <h2>Platforms — click for detail</h2>
+  <div class="grid g4">
+    ${Object.entries(PLATFORMS).map(([id, p]) => {
+      const v = m[p.primary.key];
+      const state = freshness(p.source);
+      return `<div class="card click" onclick="go('${id}')">
+        <span class="chip ${state} corner-chip">${state}</span>
+        <div class="plat-head"><div class="plat-icon">${ICONS[id]}</div><div class="plat-name">${p.name}</div></div>
+        <div class="plat-num">${fmt(v)}</div>
+        <div class="plat-extra">${p.primary.label.toLowerCase()} · ${p.handle}</div>
+      </div>`;
+    }).join("")}
+  </div>
+
+  <h2>Data sources</h2>
+  <div class="status-wrap">
+    ${Object.entries({
+      app_store: "App Store rating", google_play: "Play rating", tiktok: "TikTok",
+      instagram: "Instagram", youtube: "YouTube", facebook: "Facebook",
+      ga4_website: "Website analytics", download_counts: "Download counts",
+    }).map(([k, v]) => `<div class="status-item"><span class="dot ${st()[k] ? "on" : "off"}"></span>${v}</div>`).join("")}
+  </div>
+  <div class="status-note">
+    Grey sources still need access: Website analytics + Android download counts need Google admin approval ·
+    iOS download counts need the App Store vendor number (finance access) ·
+    Facebook &amp; Instagram engagement metrics need a free Meta developer token.
+  </div>`;
+}
+
+/* ── Store tab ── */
+function renderStores() {
+  const m = d(), mn = man();
+  return `
+  <button class="back" onclick="go('overview')">← Back to overview</button>
+  <div class="detail-hero" style="margin-bottom:22px">
+    <div class="plat-icon">${ICONS.stores}</div>
+    <div>
+      <div class="detail-title">App Stores</div>
+      <a class="detail-link" href="https://apps.apple.com/us/app/id6752485832" target="_blank">iOS App Store</a> ·
+      <a class="detail-link" href="https://play.google.com/store/apps/details?id=com.gozal.app" target="_blank">Google Play</a>
+    </div>
+  </div>
+  <div class="grid g4">
+    <div class="card hero">
+      <span class="chip manual corner-chip">manual</span>
+      <div class="label">Android installs (lifetime)</div>
+      <div class="big">${fmt(mn.android_installs_lifetime)}</div>
+      <div class="sub">as of ${mn.android_installs_as_of || "—"}</div>
+    </div>
+    <div class="card">
+      <span class="chip pending corner-chip">pending</span>
+      <div class="label">iOS installs</div>
+      <div class="big" style="color:var(--muted)">—</div>
+      <div class="sub">unlocks with App Store finance access</div>
+    </div>
+    <div class="card">
+      <div class="label">App Store rating</div>
+      <div class="big" style="font-size:34px">${m.ios_rating ?? "—"} <span class="stars">${stars(m.ios_rating)}</span></div>
+      <div class="sub">${fmt(m.ios_ratings_count)} ratings</div>
+      ${deltaChip("ios_ratings_count", { label: "ratings this week" })}
+    </div>
+    <div class="card">
+      <div class="label">Google Play rating</div>
+      <div class="big" style="font-size:34px">${m.android_rating ?? "—"} <span class="stars">${stars(m.android_rating)}</span></div>
+      <div class="sub">${fmt(m.android_ratings_count)} reviews</div>
+      ${deltaChip("android_ratings_count", { label: "reviews this week" })}
+    </div>
+  </div>
+  <h2>Review growth</h2>
+  <div class="grid g2">
+    <div class="card chart-card">
+      <div class="chart-title">iOS ratings count</div>
+      ${areaChart(series("ios_ratings_count"))}
+    </div>
+    <div class="card chart-card">
+      <div class="chart-title">Play reviews count</div>
+      ${areaChart(series("android_ratings_count"))}
+    </div>
+  </div>
+  <h2>What unlocks more</h2>
+  <div class="unlock">
+    <b>iOS download counts</b> need the App Store vendor number (whoever holds Finance access in App Store Connect can read it in one click). ·
+    <b>Android download counts</b> need a Google Workspace admin to allow API access for the gozal-metrics service account.
+  </div>`;
+}
+
+/* ── Platform detail tab ── */
+function renderPlatform(id) {
+  const p = PLATFORMS[id];
+  const m = d();
+  const state = freshness(p.source);
+  const updatedAt = su()[p.source] ? new Date(su()[p.source]).toLocaleString() : null;
+  return `
+  <button class="back" onclick="go('overview')">← Back to overview</button>
+  <div class="detail-hero" style="margin-bottom:22px">
+    <div class="plat-icon">${ICONS[id]}</div>
+    <div>
+      <div class="detail-title">${p.name} <span class="chip ${state}" style="vertical-align:middle;margin-left:6px">${state}</span></div>
+      <a class="detail-link" href="${p.url}" target="_blank">${p.handle} ↗</a>
+      ${updatedAt ? `<span class="detail-link"> · data from ${updatedAt}</span>` : ""}
+    </div>
+  </div>
+  <div class="grid g3">
+    ${p.metrics.map(mt => `
+      <div class="card">
+        <div class="label">${mt.label}</div>
+        <div class="big" style="font-size:34px">${fmt(m[mt.key])}</div>
+        ${deltaChip(mt.key)}
+      </div>`).join("")}
+  </div>
+  <h2>Trends</h2>
+  <div class="grid g2">
+    ${p.metrics.map(mt => `
+      <div class="card chart-card">
+        <div class="chart-title">${mt.label}</div>
+        ${areaChart(series(mt.key))}
+      </div>`).join("")}
+  </div>
+  <h2>What unlocks more</h2>
+  <div class="unlock">${p.unlock}</div>`;
+}
+
+/* ── router ── */
+const TABS = [
+  { id: "overview", label: "Overview" },
+  { id: "stores", label: "App Stores" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "instagram", label: "Instagram" },
+  { id: "youtube", label: "YouTube" },
+  { id: "facebook", label: "Facebook" },
+];
+
+function go(tab) {
+  location.hash = tab === "overview" ? "" : tab;
+  render(tab);
+  window.scrollTo({ top: 0 });
+}
+
+function render(tab) {
+  document.getElementById("tabs").innerHTML = TABS.map(t =>
+    `<button class="${t.id === tab ? "active" : ""}" onclick="go('${t.id}')">${t.label}</button>`
+  ).join("");
+  const el = document.getElementById("main");
+  if (tab === "overview") el.innerHTML = renderOverview();
+  else if (tab === "stores") el.innerHTML = renderStores();
+  else if (PLATFORMS[tab]) el.innerHTML = renderPlatform(tab);
+  else el.innerHTML = renderOverview();
+}
+
+async function load() {
+  try { M = await (await fetch("data/metrics.json?t=" + Date.now())).json(); } catch (e) {}
+  try { HIST = await (await fetch("data/history.json?t=" + Date.now())).json(); } catch (e) {}
+  if (M.last_updated) {
+    document.getElementById("updated").textContent =
+      "Updated " + new Date(M.last_updated).toLocaleString();
+  }
+  render(location.hash.replace("#", "") || "overview");
+}
+
+window.addEventListener("hashchange", () => render(location.hash.replace("#", "") || "overview"));
+if (new URLSearchParams(location.search).has("embed")) document.body.classList.add("embed");
+load();
+</script>
+</body>
+</html>

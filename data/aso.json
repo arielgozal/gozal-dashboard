@@ -1,0 +1,28 @@
+{
+  "updated": "2026-07-05T10:00:00+00:00",
+  "status": "draft — full keyword research pending (task: rewrite store pages)",
+  "keyword_candidates": [
+    { "keyword": "home services app", "intent": "category", "notes": "head term, both stores" },
+    { "keyword": "handyman near me", "intent": "consumer", "notes": "high volume, high competition" },
+    { "keyword": "plumber app", "intent": "consumer", "notes": "trade-specific long tail" },
+    { "keyword": "house cleaning app", "intent": "consumer", "notes": "strong STR host overlap" },
+    { "keyword": "no fee home services", "intent": "differentiator", "notes": "low volume, owns our advantage" },
+    { "keyword": "find local contractors", "intent": "consumer", "notes": "" },
+    { "keyword": "get more jobs contractor", "intent": "vendor", "notes": "vendor-side install driver" },
+    { "keyword": "thumbtack alternative", "intent": "differentiator", "notes": "competitor-switch searches" },
+    { "keyword": "angi alternative for pros", "intent": "vendor", "notes": "competitor-switch searches" }
+  ],
+  "metadata_drafts": {
+    "ios_title": "Gozal: Home Services, Free",
+    "ios_subtitle": "Pros with no fees. Tap and go.",
+    "play_short_description": "Find trusted local pros. No fees. No middleman. Tap and go.",
+    "status": "DRAFT — do not ship until keyword research validates"
+  },
+  "asset_audit": [
+    { "item": "iOS screenshots", "status": "needs rebuild", "note": "current set underperforming; show real jobs + fee comparison" },
+    { "item": "Play screenshots", "status": "needs rebuild", "note": "same set as iOS, adapted" },
+    { "item": "Preview video", "status": "missing", "note": "30s: problem > open app > connected > done. No fees card." },
+    { "item": "App icon", "status": "review", "note": "test current icon vs yellow-dominant variant" },
+    { "item": "Description copy", "status": "needs rewrite", "note": "lead with free + direct contact; humanizer voice" }
+  ]
+}

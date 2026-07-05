@@ -1,0 +1,10 @@
+{
+  "updated": "2026-07-05T10:00:00+00:00",
+  "note": "Ariel controls these. They set how much each signal source drives daily post-type suggestions on the Ideas board.",
+  "weights": {
+    "own_performance": 35,
+    "competitor_intel": 25,
+    "vendor_grievances": 25,
+    "trends_seasonal": 15
+  }
+}

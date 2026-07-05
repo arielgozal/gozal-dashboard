@@ -1,0 +1,53 @@
+{
+  "updated": "2026-07-05T10:00:00+00:00",
+  "items": [
+    {
+      "id": "idea-001",
+      "stage": "idea",
+      "audience": "vendor",
+      "pillar": "Problem/Solution",
+      "platform": "TikTok",
+      "title": "The lead lottery",
+      "hook": "Angi sold my lead to 5 other contractors. We're all calling the same person. That's not a lead, that's a lottery.",
+      "source_signal": "Pain bank + TikTok 'Thumbtack leads' complaint content has no brand answering it",
+      "created": "2026-07-05",
+      "notes": "Real vendor quote, word for word. Yotam films a vendor retelling it. CTA: keep 100% of what you earn."
+    },
+    {
+      "id": "idea-002",
+      "stage": "idea",
+      "audience": "vendor",
+      "pillar": "Behind the Pros",
+      "platform": "TikTok",
+      "title": "What $1,500/month buys you",
+      "hook": "I pay Thumbtack $1,500 a month. You know what converts? Maybe 20%. Here's what I do with that money now.",
+      "source_signal": "Competitor pain bank; Thumbtack's own TikTok gets ~500 views per post despite 32K followers",
+      "created": "2026-07-05",
+      "notes": "Side-by-side math on screen. Ends with the vendor's real Gozal profile."
+    },
+    {
+      "id": "idea-003",
+      "stage": "idea",
+      "audience": "consumer",
+      "pillar": "Problem/Solution",
+      "platform": "Instagram Reels",
+      "title": "The turnover panic",
+      "hook": "Your cleaner just cancelled. Check-in is at 3. What now?",
+      "source_signal": "ICP C (Carlos) panic moment; STR host communities are priority per approved list",
+      "created": "2026-07-05",
+      "notes": "Real tension, 30 seconds, phone footage feel. Resolution: found a backup in 60 seconds, no fees."
+    },
+    {
+      "id": "idea-004",
+      "stage": "idea",
+      "audience": "consumer",
+      "pillar": "Education",
+      "platform": "Facebook groups",
+      "title": "Hurricane season prep checklist",
+      "hook": "6 things to fix before the first storm warning, and which ones actually need a pro.",
+      "source_signal": "Seasonal trigger (South Florida hurricane season, internal targeting only); neighbor-mode value post",
+      "created": "2026-07-05",
+      "notes": "Zero selling. Gozal mentioned once, naturally, at the end. Copy never names the region."
+    }
+  ]
+}

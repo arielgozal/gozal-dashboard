@@ -1,0 +1,35 @@
+name: Collect competitor signals
+
+on:
+  schedule:
+    - cron: '23 7 * * 1'    # Mondays 07:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  signals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Collect signals
+        run: python signals.py
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+
+      - name: Commit and push
+        run: |
+          git config user.name "gozal-bot"
+          git config user.email "bot@gozalapp.com"
+          git add data/signals.json
+          git diff --cached --quiet || git commit -m "signals: weekly competitor refresh $(date -u '+%Y-%m-%d')"
+          git push
