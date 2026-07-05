@@ -80,13 +80,12 @@
     background: rgba(253,203,21,0.14); color: var(--yellow);
     border-radius: 10px; padding: 8px 12px; line-height: 1.5;
   }
+  .preview-pill span { color: #b8b8ae; font-weight: 500; }
+  .preview-pill.live { background: rgba(31,157,85,0.22); color: #7fe0a8; }
 
   /* ── Content ── */
   .content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .topbar {
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    padding: 20px 28px 0;
-  }
+  .topbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 20px 28px 0; }
   .view-title { font-size: 22px; font-weight: 800; }
   .view-sub { font-size: 12px; color: var(--muted); font-weight: 500; width: 100%; margin-top: 2px; }
   .topbar-right { margin-left: auto; font-size: 11px; color: var(--muted); font-weight: 600; }
@@ -112,10 +111,12 @@
   .tag.consumer { background: var(--black); color: var(--yellow); }
   .tag.pillar { background: var(--grey); color: var(--muted); }
   .tag.platform { background: var(--yellow-soft); color: #8a6d00; }
+  .tag.state-req { background: var(--yellow-soft); color: #8a6d00; }
+  .tag.state-ok { background: #e3f6ea; color: var(--green); }
 
   .item-title { font-size: 16px; font-weight: 700; margin: 10px 0 6px; }
   .hook { font-size: 13px; font-weight: 500; line-height: 1.6; color: var(--charcoal); background: var(--beige); border-left: 3px solid var(--yellow); padding: 10px 14px; border-radius: 0 10px 10px 0; margin: 10px 0; }
-  .meta { font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.6; }
+  .meta { font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.6; white-space: pre-line; }
 
   .btn {
     font-family: inherit; font-size: 12px; font-weight: 700;
@@ -126,9 +127,10 @@
   .btn:hover { transform: translateY(-1px); }
   .btn.primary { background: var(--yellow); color: var(--black); }
   .btn.ghost { background: var(--grey); color: var(--muted); }
-  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
   .locked { opacity: .55; cursor: not-allowed; }
   .locked:hover { transform: none; }
+  .btn:disabled { opacity: .4; cursor: wait; }
 
   .empty {
     background: repeating-linear-gradient(-45deg, transparent 0 10px, rgba(16,23,3,.02) 10px 20px);
@@ -144,8 +146,8 @@
   .weight-bar { flex: 1; height: 14px; background: var(--grey); border-radius: 999px; overflow: hidden; }
   .weight-fill { height: 100%; background: linear-gradient(90deg, var(--mustard), var(--yellow)); border-radius: 999px; }
   .weight-val { width: 44px; text-align: right; font-size: 13px; font-weight: 800; }
+  input[type=range] { flex: 1; accent-color: var(--mustard); height: 14px; }
 
-  /* signals table */
   .posts-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .posts-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--grey); }
   .posts-table td { padding: 10px; border-bottom: 1px solid var(--grey); font-weight: 500; vertical-align: top; }
@@ -169,6 +171,25 @@
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* login overlay */
+  #gate {
+    position: fixed; inset: 0; background: var(--black);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  #gate.show { display: flex; }
+  .gate-card { background: var(--white); border-radius: 24px; padding: 40px 44px; max-width: 380px; width: 92%; text-align: center; }
+  .gate-card .logo-mark { margin: 0 auto 14px; }
+  .gate-title { font-size: 20px; font-weight: 800; }
+  .gate-sub { font-size: 12px; color: var(--muted); font-weight: 500; margin: 6px 0 20px; }
+  .gate-card input {
+    width: 100%; font-family: inherit; font-size: 14px; font-weight: 600;
+    padding: 12px 16px; border-radius: 12px; border: 2px solid var(--grey);
+    outline: none; text-align: center;
+  }
+  .gate-card input:focus { border-color: var(--yellow); }
+  .gate-card .btn { width: 100%; margin-top: 12px; padding: 12px; font-size: 14px; }
+  .gate-err { color: var(--red); font-size: 12px; font-weight: 600; margin-top: 10px; min-height: 16px; }
+
   @media (max-width: 860px) {
     body { flex-direction: column; }
     aside { width: 100%; height: auto; position: static; }
@@ -191,9 +212,7 @@
   </div>
   <div class="rail-section">Pipeline</div>
   <nav class="rail" id="rail"></nav>
-  <div class="rail-foot">
-    <div class="preview-pill">PREVIEW MODE<br><span style="color:#b8b8ae;font-weight:500">Boards are live-data. Action buttons unlock when the team app ships.</span></div>
-  </div>
+  <div class="rail-foot"><div class="preview-pill" id="mode-pill">CHECKING…</div></div>
 </aside>
 
 <div class="content">
@@ -207,29 +226,117 @@
   <div class="viewport" id="viewport"></div>
 </div>
 
-<div id="toast">Actions unlock when the team app goes live</div>
+<div id="toast">Actions unlock on the team app</div>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="logo-mark">G</div>
+    <div class="gate-title">GOZAL <span style="color:var(--mustard)">ENGINE</span></div>
+    <div class="gate-sub">Team access. Ask Ariel for the key.</div>
+    <input type="password" id="gate-key" placeholder="team key" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="btn primary" onclick="unlock()">Enter</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
 
 <script>
+/* ── environment ── */
+const ON_GITHUB = location.hostname.endsWith("github.io");
+const RAW = "https://raw.githubusercontent.com/arielgozal/gozal-dashboard/main/data/";
+const DATA_BASE = ON_GITHUB || location.protocol === "file:" || location.hostname === "127.0.0.1" ? "data/" : RAW;
+let INTERACTIVE = false;
+let KEY = localStorage.getItem("gozal_team_key") || "";
+
 const STAGES = [
   { id: "data",    no: 1, name: "Data",              sub: "Every metric, every platform, auto-updated every 6 hours" },
   { id: "signals", no: 2, name: "Signals",           sub: "What's working: competitor watch, grievances, trends. Promote a signal to Ideas." },
   { id: "ideas",   no: 3, name: "Ideas",             sub: "Pick persona, platform and direction. Your weights steer the suggestions." },
   { id: "script",  no: 4, name: "Script",            sub: "Scripts, shot lists and captions. Approve a script to move it to Create." },
-  { id: "create",  no: 5, name: "Create",            sub: "Full scope preview. One explicit CREATE fires Higgsfield. Nothing runs without it." },
+  { id: "create",  no: 5, name: "Create",            sub: "Full scope preview. One explicit CREATE fires generation. Nothing runs without it." },
   { id: "approve", no: 6, name: "Approve & Publish", sub: "Your go/no-go. Nothing publishes without your click." },
   { id: "aso",     no: 7, name: "ASO",               sub: "Store keywords, metadata drafts and asset rebuild tracker" },
 ];
-const STAGE_OF_ITEM = { idea: "ideas", script: "script", create: "create", approve: "approve" };
+const STAGE_OF_ITEM = { idea: "ideas", script: "script", create: "create", create_requested: "create", approve: "approve", approved: "approve" };
 
 let PIPELINE = { items: [] }, WEIGHTS = {}, SIGNALS = {}, ASO = {}, METRICS = {};
 
 const fmt = n => (n === null || n === undefined) ? "—" : n.toLocaleString();
-const toast = () => {
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const toast = msg => {
   const t = document.getElementById("toast");
+  if (msg) t.textContent = msg;
   t.classList.add("show");
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200);
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2400);
 };
 
+/* ── API layer (interactive mode) ── */
+async function api(path, opts = {}) {
+  const r = await fetch("/api/" + path, {
+    ...opts,
+    headers: { "content-type": "application/json", "x-team-key": KEY, ...(opts.headers || {}) },
+  });
+  if (r.status === 401) { showGate(); throw new Error("unauthorized"); }
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+function showGate(err) {
+  document.getElementById("gate").classList.add("show");
+  document.getElementById("gate-err").textContent = err || "";
+  document.getElementById("gate-key").focus();
+}
+
+async function unlock() {
+  KEY = document.getElementById("gate-key").value.trim();
+  try {
+    await api("state");
+    localStorage.setItem("gozal_team_key", KEY);
+    document.getElementById("gate").classList.remove("show");
+    await loadState();
+    render(current());
+    toast("Welcome in");
+  } catch (e) {
+    if (e.message === "unauthorized") document.getElementById("gate-err").textContent = "That key didn't work";
+  }
+}
+
+async function doMove(id, to, promptNote) {
+  let note = null;
+  if (promptNote) {
+    note = prompt(promptNote);
+    if (note === null) return;
+  }
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "move", id, to, note }) });
+    await loadState();
+    render(current());
+    toast("Moved");
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+function confirmCreate(id) {
+  if (confirm("Fire generation for this item? This is the explicit CREATE - the Higgsfield job gets queued for the next agent run.")) {
+    doMove(id, "create_requested");
+  }
+}
+function confirmApprove(id) {
+  if (confirm("Approve this content for publishing?")) doMove(id, "approved");
+}
+
+async function saveWeights() {
+  const w = {};
+  document.querySelectorAll("input[data-wkey]").forEach(i => w[i.dataset.wkey] = Number(i.value));
+  const total = Object.values(w).reduce((a, b) => a + b, 0);
+  if (total < 95 || total > 105) { toast("Weights should add up to ~100 (now " + total + ")"); return; }
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "weights", weights: w }) });
+    await loadState();
+    render("ideas");
+    toast("Weights saved");
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+/* ── shared UI ── */
 function counts() {
   const c = {};
   for (const it of (PIPELINE.items || [])) {
@@ -239,22 +346,33 @@ function counts() {
   return c;
 }
 
+const lockedBtn = (label, primary) =>
+  `<button class="btn ${primary ? "primary" : ""} locked" onclick="toast('Actions unlock on the team app - this is the public read-only view')">${label}</button>`;
+
+const liveBtn = (label, fn, primary) =>
+  `<button class="btn ${primary ? "primary" : ""}" onclick="${fn}">${label}</button>`;
+
+function stateTag(it) {
+  if (it.stage === "create_requested") return `<span class="tag state-req">create requested — runs next agent session</span>`;
+  if (it.stage === "approved") return `<span class="tag state-ok">approved — ready to post</span>`;
+  return "";
+}
+
 function itemCard(it, actions) {
   return `<div class="card">
     <div>
-      <span class="tag ${it.audience}">${it.audience}</span>
-      <span class="tag pillar">${it.pillar}</span>
-      <span class="tag platform">${it.platform}</span>
+      <span class="tag ${esc(it.audience)}">${esc(it.audience)}</span>
+      <span class="tag pillar">${esc(it.pillar)}</span>
+      <span class="tag platform">${esc(it.platform)}</span>
+      ${stateTag(it)}
     </div>
-    <div class="item-title">${it.title}</div>
-    <div class="hook">"${it.hook}"</div>
-    <div class="meta"><b>Signal:</b> ${it.source_signal}<br>${it.notes || ""}</div>
+    <div class="item-title">${esc(it.title)}</div>
+    <div class="hook">"${esc(it.hook)}"</div>
+    <div class="meta"><b>Signal:</b> ${esc(it.source_signal)}
+${esc(it.notes || "")}</div>
     <div class="btn-row">${actions}</div>
   </div>`;
 }
-
-const lockedBtn = (label, primary) =>
-  `<button class="btn ${primary ? "primary" : ""} locked" onclick="toast()">${label}</button>`;
 
 /* ── views ── */
 function vData() {
@@ -267,33 +385,32 @@ function vSignals() {
   const gozal = METRICS.metrics || {};
   const profCards = profiles.map(p => `
     <div class="card">
-      <div class="label">@${p.handle} (TikTok)</div>
+      <div class="label">@${esc(p.handle)} (TikTok)</div>
       <div class="big" style="font-size:28px">${fmt(p.followers)} <span style="font-size:13px;color:var(--muted);font-weight:600">followers</span></div>
       <div class="sub">${fmt(p.total_likes)} likes · ${fmt(p.videos)} videos</div>
     </div>`).join("");
   const rows = posts.map(p => `
     <tr>
-      <td class="acct">${p.account}</td>
-      <td><a href="${p.url}" target="_blank">${p.text || "(no caption)"}</a></td>
+      <td class="acct">${esc(p.account)}</td>
+      <td><a href="${esc(p.url)}" target="_blank">${esc(p.text) || "(no caption)"}</a></td>
       <td class="num">${fmt(p.plays)}</td>
       <td class="num">${fmt(p.likes)}</td>
       <td>${p.posted ? new Date(p.posted).toLocaleDateString() : "—"}</td>
-      <td>${lockedBtn("→ Idea")}</td>
     </tr>`).join("");
   return `
     <div class="flow-note"><b>The opening:</b> competitor accounts have big follower counts and tiny view counts. Their organic is defensive. The "vendors angry at lead fees" conversation on TikTok has no brand answering it. That lane is ours.</div>
-    <h2>Competitor accounts ${SIGNALS.generated_at ? `· refreshed ${new Date(SIGNALS.generated_at).toLocaleDateString()}` : ""}</h2>
-    <div class="grid g3">${profCards || '<div class="empty">First weekly competitor scrape lands Monday — or trigger it manually from GitHub Actions.</div>'}</div>
+    <h2>Competitor accounts ${SIGNALS.generated_at ? `· refreshed ${new Date(SIGNALS.generated_at).toLocaleDateString()} · auto-refreshes Mondays` : ""}</h2>
+    <div class="grid g3">${profCards || '<div class="empty">First weekly competitor scrape lands Monday.</div>'}</div>
     <h2>Their recent posts, ranked by views</h2>
     <div class="card" style="overflow-x:auto">
       <table class="posts-table">
-        <tr><th>Account</th><th>Post</th><th>Views</th><th>Likes</th><th>Posted</th><th></th></tr>
-        ${rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">no posts collected yet</td></tr>'}
+        <tr><th>Account</th><th>Post</th><th>Views</th><th>Likes</th><th>Posted</th></tr>
+        ${rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">no posts collected yet</td></tr>'}
       </table>
     </div>
     <h2>Gozal, for contrast</h2>
     <div class="grid g3">
-      <div class="card"><div class="label">TikTok followers</div><div class="big" style="font-size:28px">${fmt(gozal.tiktok_followers)}</div><div class="sub">small but growing — and our niche content out-engages their corporate feed per follower</div></div>
+      <div class="card"><div class="label">TikTok followers</div><div class="big" style="font-size:28px">${fmt(gozal.tiktok_followers)}</div><div class="sub">small but growing — our niche out-engages their corporate feed per follower</div></div>
       <div class="card"><div class="label">Grievance bank</div><div class="big" style="font-size:28px">9</div><div class="sub">real vendor quotes ready to become hooks (brand vault §7)</div></div>
       <div class="card"><div class="label">Seasonal trigger</div><div class="big" style="font-size:22px">Hurricane season</div><div class="sub">surge demand for handymen + roofers = education content window</div></div>
     </div>`;
@@ -307,7 +424,13 @@ function vIdeas() {
     vendor_grievances: "Vendor grievances",
     trends_seasonal: "Trends & seasonal",
   };
-  const sliders = Object.entries(labels).map(([k, name]) => `
+  const sliders = Object.entries(labels).map(([k, name]) => INTERACTIVE ? `
+    <div class="weight-row">
+      <div class="weight-name">${name}</div>
+      <input type="range" min="0" max="100" step="5" value="${w[k] || 0}" data-wkey="${k}"
+        oninput="this.parentElement.querySelector('.weight-val').textContent=this.value+'%'">
+      <div class="weight-val">${w[k] ?? 0}%</div>
+    </div>` : `
     <div class="weight-row">
       <div class="weight-name">${name}</div>
       <div class="weight-bar"><div class="weight-fill" style="width:${w[k] || 0}%"></div></div>
@@ -318,11 +441,15 @@ function vIdeas() {
     <h2>Your weights — what steers tomorrow's suggestions</h2>
     <div class="card">
       ${sliders}
-      <div class="btn-row">${lockedBtn("Adjust weights", true)}<span class="meta" style="align-self:center">Sliders unlock with the team app. Until then, tell Claude and it updates same-day.</span></div>
+      <div class="btn-row">${INTERACTIVE
+        ? liveBtn("Save weights", "saveWeights()", true) + '<span class="meta">Should add up to ~100%</span>'
+        : lockedBtn("Adjust weights", true) + '<span class="meta">Sliders unlock on the team app.</span>'}</div>
     </div>
     <h2>Idea board · ${items.length} waiting</h2>
     <div class="grid g2">
-      ${items.map(it => itemCard(it, lockedBtn("Choose direction → Script", true) + lockedBtn("Discard"))).join("")
+      ${items.map(it => itemCard(it, INTERACTIVE
+          ? liveBtn("Choose direction → Script", `doMove('${it.id}','script')`, true) + liveBtn("Discard", `doMove('${it.id}','archived')`)
+          : lockedBtn("Choose direction → Script", true) + lockedBtn("Discard"))).join("")
         || '<div class="empty"><b>No ideas queued.</b><br>Promote a signal from the Signals board or ask the ideation agent for a fresh batch.</div>'}
     </div>`;
 }
@@ -330,29 +457,39 @@ function vIdeas() {
 function vScript() {
   const items = (PIPELINE.items || []).filter(i => i.stage === "script");
   return `
-    <div class="flow-note"><b>How this stage works:</b> the script agent turns a chosen idea into a filming package: hook, shot list, captions, edit guide. Everything passes the humanizer gate before a VA ever sees it. Approving here moves it to Create.</div>
+    <div class="flow-note"><b>How this stage works:</b> the script agent turns a chosen idea into a filming package: hook, shot list, captions, edit guide. Everything passes the humanizer gate before a VA sees it. Approving here moves it to Create.</div>
     <div class="grid g2">
-      ${items.map(it => itemCard(it, lockedBtn("Approve script → Create", true) + lockedBtn("Regenerate") + lockedBtn("Back to Ideas"))).join("")
+      ${items.map(it => itemCard(it, INTERACTIVE
+          ? liveBtn("Approve script → Create", `doMove('${it.id}','create')`, true) + liveBtn("Back to Ideas", `doMove('${it.id}','idea')`)
+          : lockedBtn("Approve script → Create", true) + lockedBtn("Back to Ideas"))).join("")
         || '<div class="empty"><b>Nothing in scripting.</b><br>Choose a direction on the Ideas board and the script agent picks it up.</div>'}
     </div>`;
 }
 
 function vCreate() {
-  const items = (PIPELINE.items || []).filter(i => i.stage === "create");
+  const items = (PIPELINE.items || []).filter(i => i.stage === "create" || i.stage === "create_requested");
   return `
-    <div class="flow-note"><b>The hard rule:</b> this board shows the full scope of what will be generated (format, length, style, credits) before anything runs. Only the explicit CREATE button fires Higgsfield. Nothing generates on its own.</div>
+    <div class="flow-note"><b>The hard rule:</b> only the explicit CREATE button queues generation, and the full scope shows before you press it. Queued jobs run in the next agent session (Higgsfield), then land on the Approve board.</div>
     <div class="grid g2">
-      ${items.map(it => itemCard(it, lockedBtn("⚡ CREATE", true) + lockedBtn("Back to Script"))).join("")
+      ${items.map(it => itemCard(it, it.stage === "create_requested"
+          ? (INTERACTIVE ? liveBtn("Cancel request", `doMove('${it.id}','create')`) : "")
+          : INTERACTIVE
+            ? liveBtn("⚡ CREATE", `confirmCreate('${it.id}')`, true) + liveBtn("Back to Script", `doMove('${it.id}','script')`)
+            : lockedBtn("⚡ CREATE", true) + lockedBtn("Back to Script"))).join("")
         || '<div class="empty"><b>Nothing staged for creation.</b><br>Approved scripts land here with their full generation scope for your sign-off.</div>'}
     </div>`;
 }
 
 function vApprove() {
-  const items = (PIPELINE.items || []).filter(i => i.stage === "approve");
+  const items = (PIPELINE.items || []).filter(i => i.stage === "approve" || i.stage === "approved");
   return `
-    <div class="flow-note"><b>Your gate.</b> Finished content waits here. Approve → queued to the chosen platforms. Reject → back to Script with your note. No exceptions, nothing publishes without your click.</div>
+    <div class="flow-note"><b>Your gate.</b> Finished content waits here. Approve → marked ready and the posting checklist goes to the VA. Reject → back to Script with your note. Nothing publishes without your click.</div>
     <div class="grid g2">
-      ${items.map(it => itemCard(it, lockedBtn("✓ Approve & publish", true) + lockedBtn("✗ Reject"))).join("")
+      ${items.map(it => itemCard(it, it.stage === "approved"
+          ? (INTERACTIVE ? liveBtn("Pull back", `doMove('${it.id}','approve')`) : "")
+          : INTERACTIVE
+            ? liveBtn("✓ Approve & publish", `confirmApprove('${it.id}')`, true) + liveBtn("✗ Reject", `doMove('${it.id}','script','Why is this rejected? Your note goes back to Script.')`)
+            : lockedBtn("✓ Approve & publish", true) + lockedBtn("✗ Reject"))).join("")
         || '<div class="empty"><b>Approval queue is empty.</b><br>Generated content appears here for your go/no-go before it touches any platform.</div>'}
     </div>`;
 }
@@ -370,30 +507,27 @@ function vAso() {
     <div class="grid g3">
       <div class="card"><div class="label">App Store</div><div class="big" style="font-size:28px">${m.ios_rating ?? "—"}★</div><div class="sub">${fmt(m.ios_ratings_count)} ratings · goal 50+</div></div>
       <div class="card"><div class="label">Google Play</div><div class="big" style="font-size:28px">${m.android_rating ?? "—"}★</div><div class="sub">${fmt(m.android_ratings_count)} reviews · goal 50+</div></div>
-      <div class="card"><div class="label">Listing status</div><div class="big" style="font-size:20px">Needs rebuild</div><div class="sub">${ASO.status || ""}</div></div>
+      <div class="card"><div class="label">Listing status</div><div class="big" style="font-size:20px">Needs rebuild</div><div class="sub">${esc(ASO.status || "")}</div></div>
     </div>
     <h2>Keyword candidates (draft)</h2>
     <div class="card" style="overflow-x:auto">
       <table class="posts-table">
         <tr><th>Keyword</th><th>Intent</th><th>Notes</th></tr>
-        ${kws.map(k => `<tr><td style="font-weight:700">${k.keyword}</td><td><span class="tag pillar">${k.intent}</span></td><td>${k.notes || ""}</td></tr>`).join("")}
+        ${kws.map(k => `<tr><td style="font-weight:700">${esc(k.keyword)}</td><td><span class="tag pillar">${esc(k.intent)}</span></td><td>${esc(k.notes || "")}</td></tr>`).join("")}
       </table>
-      <div class="btn-row">${lockedBtn("Run full keyword research", true)}</div>
     </div>
     <h2>Metadata drafts</h2>
     <div class="card">
-      <div class="meta" style="font-size:13px;line-height:2">
-        <b>iOS title:</b> ${md.ios_title || "—"}<br>
-        <b>iOS subtitle:</b> ${md.ios_subtitle || "—"}<br>
-        <b>Play short description:</b> ${md.play_short_description || "—"}<br>
-        <span class="status-chip warn">${md.status || "draft"}</span>
-      </div>
+      <div class="meta" style="font-size:13px;line-height:2"><b>iOS title:</b> ${esc(md.ios_title || "—")}
+<b>iOS subtitle:</b> ${esc(md.ios_subtitle || "—")}
+<b>Play short description:</b> ${esc(md.play_short_description || "—")}</div>
+      <span class="status-chip warn">${esc(md.status || "draft")}</span>
     </div>
     <h2>Asset rebuild tracker</h2>
     <div class="card" style="overflow-x:auto">
       <table class="posts-table checklist">
         <tr><th>Asset</th><th>Status</th><th>Direction</th></tr>
-        ${audit.map(a => `<tr><td>${a.item}</td><td>${chip(a.status)}</td><td>${a.note}</td></tr>`).join("")}
+        ${audit.map(a => `<tr><td>${esc(a.item)}</td><td>${chip(a.status)}</td><td>${esc(a.note)}</td></tr>`).join("")}
       </table>
     </div>`;
 }
@@ -408,6 +542,8 @@ function renderRail(active) {
       ${c[s.id] ? `<span class="count">${c[s.id]}</span>` : ""}
     </button>`).join("");
 }
+
+const current = () => location.hash.replace("#", "") || "data";
 
 function go(id) {
   location.hash = id === "data" ? "" : id;
@@ -425,18 +561,52 @@ function render(id) {
   window.scrollTo({ top: 0 });
 }
 
+async function loadState() {
+  if (INTERACTIVE) {
+    const s = await api("state");
+    PIPELINE = s.pipeline || { items: [] };
+    WEIGHTS = s.weights || {};
+    ASO = s.aso || {};
+  } else {
+    const get = async (path, fallback) => {
+      try { return await (await fetch(path + "?t=" + Date.now())).json(); } catch (e) { return fallback; }
+    };
+    [PIPELINE, WEIGHTS, ASO] = await Promise.all([
+      get(DATA_BASE + "pipeline.json", { items: [] }),
+      get(DATA_BASE + "weights.json", {}),
+      get(DATA_BASE + "aso.json", {}),
+    ]);
+  }
+}
+
 async function load() {
   const get = async (path, fallback) => {
     try { return await (await fetch(path + "?t=" + Date.now())).json(); } catch (e) { return fallback; }
   };
-  [METRICS, PIPELINE, WEIGHTS, SIGNALS, ASO] = await Promise.all([
-    get("data/metrics.json", {}), get("data/pipeline.json", { items: [] }),
-    get("data/weights.json", {}), get("data/signals.json", {}), get("data/aso.json", {}),
+  // metrics + signals always come from the repo (Actions crons write them)
+  [METRICS, SIGNALS] = await Promise.all([
+    get(DATA_BASE + "metrics.json", {}), get(DATA_BASE + "signals.json", {}),
   ]);
-  render(location.hash.replace("#", "") || "data");
+
+  // interactive if the API answers
+  try {
+    const h = await fetch("/api/health");
+    INTERACTIVE = h.ok && (await h.json()).mode === "interactive";
+  } catch (e) { INTERACTIVE = false; }
+
+  const pill = document.getElementById("mode-pill");
+  if (INTERACTIVE) {
+    pill.className = "preview-pill live";
+    pill.innerHTML = 'TEAM APP · LIVE<br><span>Actions are real. Approvals gate everything.</span>';
+    try { await loadState(); } catch (e) { /* gate shown */ }
+  } else {
+    pill.innerHTML = 'PREVIEW MODE<br><span>Read-only public view. The team app has the buttons.</span>';
+    await loadState();
+  }
+  render(current());
 }
 
-window.addEventListener("hashchange", () => render(location.hash.replace("#", "") || "data"));
+window.addEventListener("hashchange", () => render(current()));
 load();
 </script>
 </body>

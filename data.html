@@ -575,8 +575,12 @@ function render(tab) {
 }
 
 async function load() {
-  try { M = await (await fetch("data/metrics.json?t=" + Date.now())).json(); } catch (e) {}
-  try { HIST = await (await fetch("data/history.json?t=" + Date.now())).json(); } catch (e) {}
+  // On Cloudflare the deployed data/ snapshot goes stale between deploys;
+  // fetch straight from the repo, which the Actions crons keep fresh.
+  const BASE = (location.hostname.endsWith("github.io") || location.protocol === "file:" || location.hostname === "127.0.0.1")
+    ? "data/" : "https://raw.githubusercontent.com/arielgozal/gozal-dashboard/main/data/";
+  try { M = await (await fetch(BASE + "metrics.json?t=" + Date.now())).json(); } catch (e) {}
+  try { HIST = await (await fetch(BASE + "history.json?t=" + Date.now())).json(); } catch (e) {}
   if (M.last_updated) {
     document.getElementById("updated").textContent =
       "Updated " + new Date(M.last_updated).toLocaleString();

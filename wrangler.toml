@@ -1,0 +1,7 @@
+name = "gozal-engine"
+compatibility_date = "2026-07-01"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "ENGINE_KV"
+id = "f7048fce1fea43368069f3bf76b1148a"
