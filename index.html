@@ -158,6 +158,14 @@
   .flow-note { background: var(--yellow-soft); border-radius: var(--radius); padding: 16px 20px; font-size: 12.5px; font-weight: 500; line-height: 1.7; margin-bottom: 20px; }
   .flow-note b { font-weight: 700; }
 
+  textarea.script-ta {
+    width: 100%; min-height: 130px; margin-top: 10px;
+    font-family: inherit; font-size: 13px; font-weight: 500; line-height: 1.6;
+    padding: 12px 14px; border-radius: 12px; border: 2px solid var(--grey);
+    outline: none; resize: vertical; background: var(--beige); color: var(--black);
+  }
+  textarea.script-ta:focus { border-color: var(--yellow); background: var(--white); }
+
   .checklist td:first-child { font-weight: 700; white-space: nowrap; }
   .status-chip { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; padding: 3px 10px; border-radius: 999px; background: var(--grey); color: var(--muted); }
   .status-chip.bad { background: #fdeceb; color: var(--red); }
@@ -259,6 +267,7 @@ const STAGES = [
 const STAGE_OF_ITEM = { idea: "ideas", script: "script", create: "create", create_requested: "create", approve: "approve", approved: "approve" };
 
 let PIPELINE = { items: [] }, WEIGHTS = {}, SIGNALS = {}, ASO = {}, METRICS = {};
+let POOL_COUNT = null;
 
 const fmt = n => (n === null || n === undefined) ? "—" : n.toLocaleString();
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -326,14 +335,68 @@ function confirmApprove(id) {
 async function saveWeights() {
   const w = {};
   document.querySelectorAll("input[data-wkey]").forEach(i => w[i.dataset.wkey] = Number(i.value));
-  const total = Object.values(w).reduce((a, b) => a + b, 0);
-  if (total < 95 || total > 105) { toast("Weights should add up to ~100 (now " + total + ")"); return; }
+  if (Object.values(w).reduce((a, b) => a + b, 0) <= 0) { toast("Give at least one source some weight"); return; }
   try {
+    // server auto-balances whatever mix you set to total 100
     await api("action", { method: "POST", body: JSON.stringify({ type: "weights", weights: w }) });
     await loadState();
     render("ideas");
-    toast("Weights saved");
+    toast("Weights saved ✓ (auto-balanced to 100)");
   } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+async function drawIdeas() {
+  try {
+    const r = await api("action", { method: "POST", body: JSON.stringify({ type: "draw_ideas", count: 3 }) });
+    await loadState();
+    render("ideas");
+    toast(r.ok ? `${r.drawn} fresh ideas on the board (${r.pool_left} left in pool)` : r.reason);
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+async function saveItemField(id, field, elId) {
+  const val = document.getElementById(elId).value;
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "update", id, fields: { [field]: val } }) });
+    await loadState();
+    toast("Saved");
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+async function saveScript(id, platform, elId) {
+  const val = document.getElementById(elId).value;
+  const item = (PIPELINE.items || []).find(i => i.id === id);
+  const scripts = { ...(item?.scripts || {}) , [platform]: val };
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "update", id, fields: { scripts } }) });
+    await loadState();
+    toast("Script saved for " + platform);
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
+const ACTIVE_PLATFORM = {};
+function setPlat(id, p) { ACTIVE_PLATFORM[id] = p; render(current()); }
+
+function copyText(text, what) {
+  navigator.clipboard.writeText(text).then(() => toast((what || "Copied") + " ✓"))
+    .catch(() => toast("Copy failed — select and copy manually"));
+}
+
+async function downloadAsset(url, name) {
+  toast("Downloading…");
+  try {
+    const r = await fetch(url);
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name || "gozal-content.mp4";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("Saved to your Downloads ✓");
+  } catch (e) {
+    window.open(url, "_blank");
+    toast("Opened the file — save it from there");
+  }
 }
 
 /* ── shared UI ── */
@@ -358,18 +421,20 @@ function stateTag(it) {
   return "";
 }
 
-function itemCard(it, actions) {
+function itemCard(it, actions, extra) {
+  const plats = (it.platforms && it.platforms.length) ? it.platforms : [it.platform];
   return `<div class="card">
     <div>
       <span class="tag ${esc(it.audience)}">${esc(it.audience)}</span>
       <span class="tag pillar">${esc(it.pillar)}</span>
-      <span class="tag platform">${esc(it.platform)}</span>
+      ${plats.map(p => `<span class="tag platform">${esc(p)}</span>`).join(" ")}
       ${stateTag(it)}
     </div>
     <div class="item-title">${esc(it.title)}</div>
     <div class="hook">"${esc(it.hook)}"</div>
     <div class="meta"><b>Signal:</b> ${esc(it.source_signal)}
 ${esc(it.notes || "")}</div>
+    ${extra || ""}
     <div class="btn-row">${actions}</div>
   </div>`;
 }
@@ -445,24 +510,65 @@ function vIdeas() {
         ? liveBtn("Save weights", "saveWeights()", true) + '<span class="meta">Should add up to ~100%</span>'
         : lockedBtn("Adjust weights", true) + '<span class="meta">Sliders unlock on the team app.</span>'}</div>
     </div>
-    <h2>Idea board · ${items.length} waiting</h2>
+    <h2 style="display:flex;align-items:center;gap:14px">Idea board · ${items.length} waiting
+      ${INTERACTIVE ? `<button class="btn primary" style="text-transform:none;letter-spacing:0" onclick="drawIdeas()">✨ New ideas${typeof POOL_COUNT === "number" ? ` (${POOL_COUNT} in pool)` : ""}</button>` : ""}
+    </h2>
     <div class="grid g2">
       ${items.map(it => itemCard(it, INTERACTIVE
           ? liveBtn("Choose direction → Script", `doMove('${it.id}','script')`, true) + liveBtn("Discard", `doMove('${it.id}','archived')`)
           : lockedBtn("Choose direction → Script", true) + lockedBtn("Discard"))).join("")
-        || '<div class="empty"><b>No ideas queued.</b><br>Promote a signal from the Signals board or ask the ideation agent for a fresh batch.</div>'}
+        || '<div class="empty"><b>No ideas queued.</b><br>Hit ✨ New ideas to draw from the pool. The daily agent keeps the pool stocked using your weights.</div>'}
     </div>`;
+}
+
+const ALL_PLATFORMS = ["TikTok", "Instagram Reels", "Instagram Carousel", "Facebook", "YouTube Shorts", "Nextdoor"];
+
+function scriptEditor(it) {
+  const plats = (it.platforms && it.platforms.length) ? it.platforms : [it.platform];
+  const active = ACTIVE_PLATFORM[it.id] || plats[0];
+  const scripts = it.scripts || {};
+  const taId = "ta-" + it.id;
+  const chips = ALL_PLATFORMS.map(p => {
+    const on = plats.includes(p);
+    return `<button class="btn ${p === active ? "primary" : on ? "" : "ghost"}" style="padding:6px 12px;font-size:11px"
+      onclick="${on ? `setPlat('${it.id}','${p}')` : `togglePlatform('${it.id}','${p}')`}"
+      title="${on ? "show this platform's script" : "click to add this platform"}">${p}${on ? "" : " +"}</button>`;
+  }).join("");
+  return `
+    <div style="margin-top:14px">
+      <div class="label" style="margin-bottom:8px">Platforms — click one to view/edit, + to add</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${chips}</div>
+      <textarea id="${taId}" class="script-ta" placeholder="No ${active} script yet. The daily agent drafts it on its next run, or write/paste your own here.">${esc(scripts[active] || "")}</textarea>
+      <div class="btn-row">
+        ${liveBtn("Save " + active + " script", `saveScript('${it.id}','${active}','${taId}')`, true)}
+        ${liveBtn("Copy", `copyText(document.getElementById('${taId}').value,'Script')`)}
+      </div>
+    </div>`;
+}
+
+async function togglePlatform(id, p) {
+  const item = (PIPELINE.items || []).find(i => i.id === id);
+  const plats = (item.platforms && item.platforms.length) ? [...item.platforms] : [item.platform];
+  if (!plats.includes(p)) plats.push(p);
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "update", id, fields: { platforms: plats } }) });
+    await loadState();
+    ACTIVE_PLATFORM[id] = p;
+    render(current());
+    toast(p + " added");
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
 }
 
 function vScript() {
   const items = (PIPELINE.items || []).filter(i => i.stage === "script");
   return `
-    <div class="flow-note"><b>How this stage works:</b> the script agent turns a chosen idea into a filming package: hook, shot list, captions, edit guide. Everything passes the humanizer gate before a VA sees it. Approving here moves it to Create.</div>
-    <div class="grid g2">
+    <div class="flow-note"><b>Script agent</b> turns a chosen idea into a filming package per platform: hook, shot list, captions, edit guide, humanizer-checked. Pick platforms on each card; each platform gets its own tailored script. Edit anything directly. Approving moves it to Create.</div>
+    <div class="grid g2" style="grid-template-columns:1fr">
       ${items.map(it => itemCard(it, INTERACTIVE
           ? liveBtn("Approve script → Create", `doMove('${it.id}','create')`, true) + liveBtn("Back to Ideas", `doMove('${it.id}','idea')`)
-          : lockedBtn("Approve script → Create", true) + lockedBtn("Back to Ideas"))).join("")
-        || '<div class="empty"><b>Nothing in scripting.</b><br>Choose a direction on the Ideas board and the script agent picks it up.</div>'}
+          : lockedBtn("Approve script → Create", true) + lockedBtn("Back to Ideas"),
+        INTERACTIVE ? scriptEditor(it) : "")).join("")
+        || '<div class="empty"><b>Nothing in scripting.</b><br>Choose a direction on the Ideas board and the script agent picks it up on its next run.</div>'}
     </div>`;
 }
 
@@ -480,17 +586,55 @@ function vCreate() {
     </div>`;
 }
 
-function vApprove() {
-  const items = (PIPELINE.items || []).filter(i => i.stage === "approve" || i.stage === "approved");
+function packageText(it) {
+  const plats = (it.platforms && it.platforms.length) ? it.platforms : [it.platform];
+  const scripts = it.scripts || {};
+  let out = `${it.title}\nAudience: ${it.audience} · Platforms: ${plats.join(", ")}\n\n`;
+  if (it.caption) out += `CAPTION:\n${it.caption}\n\n`;
+  for (const p of plats) if (scripts[p]) out += `--- ${p.toUpperCase()} ---\n${scripts[p]}\n\n`;
+  if (it.asset_url) out += `VIDEO FILE: ${it.asset_url}\n`;
+  return out.trim();
+}
+
+function deliverable(it) {
+  const capId = "cap-" + it.id;
+  const safeName = it.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".mp4";
   return `
-    <div class="flow-note"><b>Your gate.</b> Finished content waits here. Approve → marked ready and the posting checklist goes to the VA. Reject → back to Script with your note. Nothing publishes without your click.</div>
-    <div class="grid g2">
-      ${items.map(it => itemCard(it, it.stage === "approved"
-          ? (INTERACTIVE ? liveBtn("Pull back", `doMove('${it.id}','approve')`) : "")
-          : INTERACTIVE
-            ? liveBtn("✓ Approve & publish", `confirmApprove('${it.id}')`, true) + liveBtn("✗ Reject", `doMove('${it.id}','script','Why is this rejected? Your note goes back to Script.')`)
-            : lockedBtn("✓ Approve & publish", true) + lockedBtn("✗ Reject"))).join("")
-        || '<div class="empty"><b>Approval queue is empty.</b><br>Generated content appears here for your go/no-go before it touches any platform.</div>'}
+    <div style="margin-top:14px">
+      ${it.asset_url ? `
+        <video controls preload="metadata" style="width:100%;max-width:280px;border-radius:14px;display:block;background:#000" src="${esc(it.asset_url)}"></video>
+        <div class="btn-row">
+          ${liveBtn("⬇ Download video", `downloadAsset('${esc(it.asset_url)}','${safeName}')`, true)}
+        </div>` : ""}
+      <div class="label" style="margin:12px 0 6px">Caption / post text — edit, then copy</div>
+      <textarea id="${capId}" class="script-ta" placeholder="No caption yet — the social agent writes one on its next run, or paste your own.">${esc(it.caption || "")}</textarea>
+      <div class="btn-row">
+        ${liveBtn("Save", `saveItemField('${it.id}','caption','${capId}')`)}
+        ${liveBtn("Copy caption", `copyText(document.getElementById('${capId}').value,'Caption')`)}
+        ${liveBtn("📋 Copy full package", `copyText(packageText(PIPELINE.items.find(i=>i.id==='${it.id}')),'Package (send to your poster)')`, true)}
+      </div>
+    </div>`;
+}
+
+function vApprove() {
+  const waiting = (PIPELINE.items || []).filter(i => i.stage === "approve");
+  const approved = (PIPELINE.items || []).filter(i => i.stage === "approved");
+  const card = it => itemCard(it,
+    it.stage === "approved"
+      ? (INTERACTIVE ? liveBtn("Pull back", `doMove('${it.id}','approve')`) + liveBtn("Mark posted", `doMove('${it.id}','archived','Where was it posted? (optional)')`) : "")
+      : INTERACTIVE
+        ? liveBtn("✓ Approve", `confirmApprove('${it.id}')`, true) + liveBtn("✗ Reject", `doMove('${it.id}','script','Why is this rejected? Your note goes back to Script.')`)
+        : lockedBtn("✓ Approve", true) + lockedBtn("✗ Reject"),
+    INTERACTIVE ? deliverable(it) : "");
+  return `
+    <div class="flow-note"><b>Your gate.</b> Nothing publishes automatically, ever. Approve a piece, then post it yourself or hit 📋 Copy full package and send it to whoever posts for you. Download puts the video straight in your Downloads folder. Reject sends it back to Script with your note.</div>
+    <h2>Waiting for your go/no-go · ${waiting.length}</h2>
+    <div class="grid g2" style="grid-template-columns:1fr">
+      ${waiting.map(card).join("") || '<div class="empty"><b>Nothing waiting.</b><br>Generated content lands here for your decision.</div>'}
+    </div>
+    <h2>Approved — ready to post · ${approved.length}</h2>
+    <div class="grid g2" style="grid-template-columns:1fr">
+      ${approved.map(card).join("") || '<div class="empty">Approved pieces sit here with their copy tools until you mark them posted.</div>'}
     </div>`;
 }
 
@@ -567,6 +711,7 @@ async function loadState() {
     PIPELINE = s.pipeline || { items: [] };
     WEIGHTS = s.weights || {};
     ASO = s.aso || {};
+    POOL_COUNT = s.pool_count ?? null;
   } else {
     const get = async (path, fallback) => {
       try { return await (await fetch(path + "?t=" + Date.now())).json(); } catch (e) { return fallback; }

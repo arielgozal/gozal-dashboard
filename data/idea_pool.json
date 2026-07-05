@@ -1,0 +1,125 @@
+{
+  "note": "Idea pool: the New Ideas button draws from here. The daily agent refills it using signals + weights.",
+  "items": [
+    {
+      "id": "pool-001",
+      "audience": "vendor",
+      "pillar": "Problem/Solution",
+      "platform": "TikTok",
+      "title": "The $18,000 year",
+      "hook": "I paid Thumbtack $18,000 last year. For leads. That maybe called back.",
+      "source_signal": "Pain bank: vendors report $1,500-2,000/month in credits at ~20% conversion",
+      "notes": "Whiteboard or receipt-stack visual. End card: what $0 in fees looks like."
+    },
+    {
+      "id": "pool-002",
+      "audience": "vendor",
+      "pillar": "Problem/Solution",
+      "platform": "TikTok",
+      "title": "That's not a lead, that's a lottery",
+      "hook": "Angi sold my lead to 5 other contractors. We're all calling the same lady.",
+      "source_signal": "Pain bank quote, word for word. The complaint content on TikTok has no brand answering it.",
+      "notes": "Skit: 5 phones ringing on one kitchen counter. Homeowner overwhelmed. Cut to direct chat on Gozal."
+    },
+    {
+      "id": "pool-003",
+      "audience": "vendor",
+      "pillar": "Behind the Pros",
+      "platform": "Instagram Reels",
+      "title": "Day one on Gozal",
+      "hook": "First morning without a lead fee. Here's what happened.",
+      "source_signal": "Vendor activation research: first-transaction stories drive signups",
+      "notes": "Real vendor, phone footage, first direct customer message on screen. Yotam films."
+    },
+    {
+      "id": "pool-004",
+      "audience": "vendor",
+      "pillar": "Education",
+      "platform": "Instagram Carousel",
+      "title": "Tony's math",
+      "hook": "20% of your leads convert. You pay for 100%. Slide the math.",
+      "source_signal": "Pain bank conversion complaints; carousel = save/share format",
+      "notes": "Slide-by-slide cost breakdown, Gozal yellow on black. Final slide: keep 100%."
+    },
+    {
+      "id": "pool-005",
+      "audience": "vendor",
+      "pillar": "Social Proof",
+      "platform": "YouTube Shorts",
+      "title": "Why I left (vendor testimonial template)",
+      "hook": "Fifteen years in the trade. Two years paying to compete against fake reviews. Done.",
+      "source_signal": "Pain bank: fake review frustration; testimonial format humanizes supply side",
+      "notes": "Template for repeatable series: one vendor, one reason, 20 seconds, their own words."
+    },
+    {
+      "id": "pool-006",
+      "audience": "consumer",
+      "pillar": "Problem/Solution",
+      "platform": "Instagram Reels",
+      "title": "Callback purgatory",
+      "hook": "Day 3 of waiting for a plumber to call back. He's not calling back.",
+      "source_signal": "Maria ICP: called 3 pros, two never answered, one booked 2 weeks out",
+      "notes": "Montage of waiting by the phone getting more absurd. Resolution: direct chat, plumber tomorrow 9am."
+    },
+    {
+      "id": "pool-007",
+      "audience": "consumer",
+      "pillar": "Problem/Solution",
+      "platform": "TikTok",
+      "title": "The service fee reveal",
+      "hook": "The quote said $150. Checkout says $189. What happened?",
+      "source_signal": "Pain bank consumer quote: fees revealed at checkout",
+      "notes": "Split screen: other apps' checkout vs Gozal (same number start to finish)."
+    },
+    {
+      "id": "pool-008",
+      "audience": "consumer",
+      "pillar": "Social Proof",
+      "platform": "Facebook",
+      "title": "The property manager bench",
+      "hook": "She manages 14 properties and stopped scrambling for vendors. Here's her setup.",
+      "source_signal": "Sandra ICP (priority, highest LTV): needs 10 reliable pros across trades",
+      "notes": "Case-study style. Reliability angle, not price angle. Also fits LinkedIn."
+    },
+    {
+      "id": "pool-009",
+      "audience": "consumer",
+      "pillar": "Problem/Solution",
+      "platform": "Instagram Reels",
+      "title": "60-second backup cleaner",
+      "hook": "Guest checks in at 3. Cleaner ghosted at noon. Watch this.",
+      "source_signal": "Carlos ICP panic moment; STR host communities are approved priority targets",
+      "notes": "Screen-record the actual app flow in real time with a visible timer. Authenticity is the pitch."
+    },
+    {
+      "id": "pool-010",
+      "audience": "consumer",
+      "pillar": "Education",
+      "platform": "Instagram Carousel",
+      "title": "DIY or call a pro?",
+      "hook": "6 home fixes people get wrong, and the one rule for knowing which is which.",
+      "source_signal": "Education pillar earns saves/shares; zero selling builds trust",
+      "notes": "Screenshot-worthy. Gozal branding light, value heavy."
+    },
+    {
+      "id": "pool-011",
+      "audience": "consumer",
+      "pillar": "Education",
+      "platform": "Nextdoor",
+      "title": "Vet any contractor in 5 minutes",
+      "hook": "Before you hire anyone: license lookup, insurance ask, and the one question that filters 90% of flakes.",
+      "source_signal": "Neighbor-mode value post; Nextdoor is a standing pillar channel",
+      "notes": "Pure helpfulness. Gozal mentioned once at the end, naturally, no link."
+    },
+    {
+      "id": "pool-012",
+      "audience": "vendor",
+      "pillar": "Behind the Pros",
+      "platform": "TikTok",
+      "title": "5 free things",
+      "hook": "5 things pros on Gozal give away free that other apps charge them for.",
+      "source_signal": "Ariel's earlier UGC concept, revived: profile, direct chat, reviews, photos, leads",
+      "notes": "Fast-cut listicle, vendor voiceover. Countdown format holds retention."
+    }
+  ]
+}

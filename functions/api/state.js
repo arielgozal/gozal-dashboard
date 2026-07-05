@@ -24,5 +24,15 @@ export async function onRequestGet(ctx) {
     }
     out[k] = v;
   }
+  // idea pool size for the "new ideas" button
+  let pool = await ctx.env.ENGINE_KV.get("idea_pool", "json");
+  if (!pool) {
+    const r = await fetch(RAW + "idea_pool.json", { cf: { cacheTtl: 0 } });
+    if (r.ok) {
+      pool = await r.json();
+      await ctx.env.ENGINE_KV.put("idea_pool", JSON.stringify(pool));
+    }
+  }
+  out.pool_count = pool ? (pool.items || []).length : 0;
   return Response.json(out);
 }
