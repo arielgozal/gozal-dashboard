@@ -416,7 +416,7 @@ const liveBtn = (label, fn, primary) =>
   `<button class="btn ${primary ? "primary" : ""}" onclick="${fn}">${label}</button>`;
 
 function stateTag(it) {
-  if (it.stage === "create_requested") return `<span class="tag state-req">create requested — runs next agent session</span>`;
+  if (it.stage === "create_requested") return `<span class="tag state-req">create requested — queued for the studio worker</span>`;
   if (it.stage === "approved") return `<span class="tag state-ok">approved — ready to post</span>`;
   return "";
 }
@@ -538,7 +538,7 @@ function scriptEditor(it) {
     <div style="margin-top:14px">
       <div class="label" style="margin-bottom:8px">Platforms — click one to view/edit, + to add</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">${chips}</div>
-      <textarea id="${taId}" class="script-ta" placeholder="No ${active} script yet. The daily agent drafts it on its next run, or write/paste your own here.">${esc(scripts[active] || "")}</textarea>
+      <textarea id="${taId}" class="script-ta" placeholder="No ${active} script yet. The cloud agent drafts it on its daily run, or write/paste your own here.">${esc(scripts[active] || "")}</textarea>
       <div class="btn-row">
         ${liveBtn("Save " + active + " script", `saveScript('${it.id}','${active}','${taId}')`, true)}
         ${liveBtn("Copy", `copyText(document.getElementById('${taId}').value,'Script')`)}
@@ -575,7 +575,7 @@ function vScript() {
 function vCreate() {
   const items = (PIPELINE.items || []).filter(i => i.stage === "create" || i.stage === "create_requested");
   return `
-    <div class="flow-note"><b>The hard rule:</b> only the explicit CREATE button queues generation, and the full scope shows before you press it. Queued jobs run in the next agent session (Higgsfield), then land on the Approve board.</div>
+    <div class="flow-note"><b>The hard rule:</b> only your explicit CREATE click queues generation. Nothing is ever generated on the engine's own initiative. Queued jobs are picked up by the studio worker (Higgsfield) and land on the Approve board.</div>
     <div class="grid g2">
       ${items.map(it => itemCard(it, it.stage === "create_requested"
           ? (INTERACTIVE ? liveBtn("Cancel request", `doMove('${it.id}','create')`) : "")
