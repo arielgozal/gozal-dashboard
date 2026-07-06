@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05T08:44:12+00:00",
+  "generated_at": "2026-07-06T17:31:27+00:00",
   "competitor_profiles": [
     {
       "handle": "angi",
@@ -8,24 +8,24 @@
       "videos": 0
     },
     {
+      "handle": "thumbtack",
+      "followers": 32300,
+      "total_likes": 406700,
+      "videos": 211
+    },
+    {
       "handle": "taskrabbit",
       "followers": 16400,
       "total_likes": 106300,
       "videos": 1052
-    },
-    {
-      "handle": "thumbtack",
-      "followers": 32200,
-      "total_likes": 405300,
-      "videos": 211
     }
   ],
   "competitor_posts": [
     {
       "account": "taskrabbit",
       "text": "Monetize your skills? Yes, please! \ud83d\udcb8 #tasker #taskrabbit #sidehustle #sidegig #extraincome #gigeconomy #handyman",
-      "plays": 349700,
-      "likes": 9382,
+      "plays": 349800,
+      "likes": 9390,
       "comments": 359,
       "shares": 1062,
       "posted": "2025-07-01T19:25:43.000Z",
@@ -34,8 +34,8 @@
     {
       "account": "thumbtack",
       "text": "Find top-rated Seattle home pros. ",
-      "plays": 240900,
-      "likes": 496,
+      "plays": 252600,
+      "likes": 506,
       "comments": 2,
       "shares": 15,
       "posted": "2026-05-09T03:50:41.000Z",
@@ -54,7 +54,7 @@
     {
       "account": "taskrabbit",
       "text": "Expectation: \u2600\ufe0f\ud83c\udf0a\ud83d\udcda\ud83d\ude0a\nReality: \ud83e\uddfd\ud83e\uddf9\ud83e\uddfa\u2639\ufe0f",
-      "plays": 2512,
+      "plays": 2552,
       "likes": 14,
       "comments": 0,
       "shares": 0,
@@ -64,28 +64,18 @@
     {
       "account": "taskrabbit",
       "text": "Because no one likes raw hot dogs \ud83d\ude2c\ud83c\udf2d #fourthofjulyweekend #fourthofjulyparty ",
-      "plays": 1675,
-      "likes": 12,
+      "plays": 1835,
+      "likes": 14,
       "comments": 1,
       "shares": 0,
       "posted": "2026-07-01T21:00:51.000Z",
       "url": "https://www.tiktok.com/@taskrabbit/video/7657667393656802573"
     },
     {
-      "account": "thumbtack",
-      "text": "Now loading: curb appeal.",
-      "plays": 991,
-      "likes": 5,
-      "comments": 1,
-      "shares": 1,
-      "posted": "2026-06-04T01:00:12.000Z",
-      "url": "https://www.tiktok.com/@thumbtack/video/7647338746270027022"
-    },
-    {
       "account": "taskrabbit",
       "text": "That's our roommate now. \ud83e\udd1d",
-      "plays": 980,
-      "likes": 12,
+      "plays": 1052,
+      "likes": 14,
       "comments": 0,
       "shares": 0,
       "posted": "2026-06-30T20:10:55.000Z",
@@ -93,18 +83,18 @@
     },
     {
       "account": "thumbtack",
-      "text": "Don\u2019t let patchy walls happen to you.",
-      "plays": 791,
+      "text": "Now loading: curb appeal.",
+      "plays": 1016,
       "likes": 5,
-      "comments": 2,
-      "shares": 0,
-      "posted": "2026-05-23T02:00:15.000Z",
-      "url": "https://www.tiktok.com/@thumbtack/video/7642901259535535374"
+      "comments": 1,
+      "shares": 1,
+      "posted": "2026-06-04T01:00:12.000Z",
+      "url": "https://www.tiktok.com/@thumbtack/video/7647338746270027022"
     },
     {
       "account": "thumbtack",
       "text": "Surprise visits from the in-laws hit different when you have the perfect guest house out back.",
-      "plays": 786,
+      "plays": 827,
       "likes": 2,
       "comments": 1,
       "shares": 0,
@@ -113,9 +103,19 @@
     },
     {
       "account": "thumbtack",
+      "text": "Don\u2019t let patchy walls happen to you.",
+      "plays": 805,
+      "likes": 5,
+      "comments": 2,
+      "shares": 0,
+      "posted": "2026-05-23T02:00:15.000Z",
+      "url": "https://www.tiktok.com/@thumbtack/video/7642901259535535374"
+    },
+    {
+      "account": "thumbtack",
       "text": "This is your sign to clean your washing machine. \ud83e\uddfa",
-      "plays": 567,
-      "likes": 3,
+      "plays": 629,
+      "likes": 4,
       "comments": 1,
       "shares": 1,
       "posted": "2026-06-22T18:01:37.000Z",
