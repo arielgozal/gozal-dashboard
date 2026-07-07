@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-07-06T22:46:10+00:00",
+  "last_updated": "2026-07-07T11:25:57+00:00",
   "metrics": {
     "ios_rating": 4.5,
     "ios_ratings_count": 17,
     "android_rating": 5.0,
     "android_ratings_count": 13,
     "tiktok_followers": 132,
-    "tiktok_likes": 579,
+    "tiktok_likes": 580,
     "tiktok_videos": 101,
     "instagram_followers": 28,
     "instagram_posts": 131,
@@ -32,11 +32,11 @@
     "download_counts": false
   },
   "sources_updated": {
-    "app_store": "2026-07-06T22:46:10+00:00",
-    "google_play": "2026-07-06T22:46:10+00:00",
-    "tiktok": "2026-07-06T22:46:10+00:00",
-    "instagram": "2026-07-06T22:46:10+00:00",
-    "youtube": "2026-07-06T22:46:10+00:00",
-    "facebook": "2026-07-06T22:46:10+00:00"
+    "app_store": "2026-07-07T11:25:57+00:00",
+    "google_play": "2026-07-07T11:25:57+00:00",
+    "tiktok": "2026-07-07T11:25:57+00:00",
+    "instagram": "2026-07-07T11:25:57+00:00",
+    "youtube": "2026-07-07T11:25:57+00:00",
+    "facebook": "2026-07-07T11:25:57+00:00"
   }
 }
