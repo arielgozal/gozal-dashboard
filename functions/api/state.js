@@ -1,9 +1,9 @@
-// Engine state: pipeline / weights / aso live in Cloudflare KV.
+// Engine state: pipeline / weights live in Cloudflare KV.
 // Seeded from the GitHub repo's data/*.json on first read.
 // Metrics/signals/history stay in GitHub (written by Actions crons) and are
 // fetched by the front end directly — this API only owns the workflow state.
 
-const KEYS = ["pipeline", "weights", "aso"];
+const KEYS = ["pipeline", "weights"];
 const RAW = "https://raw.githubusercontent.com/arielgozal/gozal-dashboard/main/data/";
 
 function authorized(ctx) {

@@ -13,7 +13,7 @@ Base: https://gozal-engine.pages.dev
 Auth header on every call: `x-team-key: $ENGINE_TEAM_KEY` (env var).
 Use curl. Do not use python urllib (Cloudflare blocks it).
 
-- Read everything: `GET /api/state` → { pipeline, weights, aso, pool_count }
+- Read everything: `GET /api/state` → { pipeline, weights, pool_count }
 - Edit an item: `POST /api/action` `{"type":"update","id":ID,"fields":{"scripts":{...},"caption":"..."}}`
 - Refill ideas: `POST /api/action` `{"type":"add_pool","items":[...]}`
 

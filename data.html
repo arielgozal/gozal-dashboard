@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Gozal — Growth Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23FDCB15'/%3E%3Ctext x='32' y='45' font-family='Arial, sans-serif' font-size='38' font-weight='900' text-anchor='middle' fill='%23101703'%3EG%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -312,14 +313,26 @@ function delta7(key) {
   return s[s.length - 1].v - base.v;
 }
 
-function deltaChip(key, opts = {}) {
-  const dl = delta7(key);
+function chipFor(dl, label = "this week") {
   if (dl === null) return `<span class="delta flat">tracking started</span>`;
   if (dl === 0) return `<span class="delta flat">— no change this week</span>`;
   const cls = dl > 0 ? "up" : "down";
   const arrow = dl > 0 ? "▲" : "▼";
-  return `<span class="delta ${cls}">${arrow} ${dl > 0 ? "+" : ""}${fmt(dl)} ${opts.label || "this week"}</span>`;
+  return `<span class="delta ${cls}">${arrow} ${dl > 0 ? "+" : ""}${fmt(dl)} ${label}</span>`;
 }
+
+function deltaChip(key, opts = {}) {
+  return chipFor(delta7(key), opts.label);
+}
+
+/* sum of per-key 7-day deltas — each key measured against its own history,
+   so a source that started reporting mid-week doesn't fake a growth spike */
+function delta7sum(keys) {
+  const ds = keys.map(delta7).filter(v => v !== null);
+  return ds.length ? ds.reduce((a, b) => a + b, 0) : null;
+}
+
+const FOLLOWER_KEYS = ["tiktok_followers", "instagram_followers", "youtube_subscribers", "facebook_followers"];
 
 /* ── SVG area chart ── */
 function areaChart(pts, { height = 150 } = {}) {
@@ -372,12 +385,14 @@ function renderOverview() {
   const ratings = [m.ios_rating, m.android_rating].filter(Boolean);
   const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b) / ratings.length).toFixed(1) : null;
 
-  /* combined follower history */
+  /* combined follower history — carry each platform's last known value forward
+     so one failed scrape doesn't dent the line */
+  const seen = {};
   const combined = HIST.map(x => {
-    const v = (x.tiktok_followers || 0) + (x.instagram_followers || 0) + (x.youtube_subscribers || 0) + (x.facebook_followers || 0);
-    return { t: new Date(x.ts).getTime(), v };
+    for (const k of FOLLOWER_KEYS) if (x[k] !== null && x[k] !== undefined) seen[k] = x[k];
+    return { t: new Date(x.ts).getTime(), v: FOLLOWER_KEYS.reduce((a, k) => a + (seen[k] || 0), 0) };
   }).filter(p => p.v > 0);
-  const combinedDelta = combined.length >= 2 ? combined[combined.length - 1].v - combined[0].v : null;
+  const combinedDelta = delta7sum(FOLLOWER_KEYS);
 
   const reviewsBest = Math.max(m.ios_ratings_count || 0, m.android_ratings_count || 0);
 
@@ -393,9 +408,7 @@ function renderOverview() {
     <div class="card click" onclick="go('tiktok')">
       <div class="label">Combined followers</div>
       <div class="big">${fmt(totalFollowers)}</div>
-      ${combinedDelta === null ? '<span class="delta flat">tracking started</span>'
-        : combinedDelta === 0 ? '<span class="delta flat">— no change this week</span>'
-        : `<span class="delta ${combinedDelta > 0 ? "up" : "down"}">${combinedDelta > 0 ? "▲ +" : "▼ "}${fmt(combinedDelta)} this week</span>`}
+      ${chipFor(combinedDelta)}
       <div class="sub">TikTok + Instagram + YouTube + Facebook</div>
     </div>
     <div class="card click" onclick="go('stores')">
@@ -406,16 +419,38 @@ function renderOverview() {
     <div class="card click" onclick="go('stores')">
       <div class="label">Total store reviews</div>
       <div class="big">${fmt(totalReviews)}</div>
-      ${deltaChip("ios_ratings_count")}
+      ${chipFor(delta7sum(["ios_ratings_count", "android_ratings_count"]), "reviews this week")}
       <div class="sub">${fmt(m.ios_ratings_count)} iOS · ${fmt(m.android_ratings_count)} Play</div>
     </div>
   </div>
 
-  <h2>90-day goals</h2>
-  <div class="grid g3">
-    ${goalCard("App downloads", mn.android_installs_lifetime, GOALS.downloads, "goal: 500 organic")}
-    ${goalCard("Store reviews (best store)", reviewsBest, GOALS.reviews_per_store, "goal: 50+ per store")}
-    ${goalCard("Combined followers", totalFollowers, GOALS.followers, "goal: 1,000")}
+  <h2>The north star — density gates</h2>
+  <div class="grid g4">
+    <div class="card">
+      <span class="chip live corner-chip">current gate</span>
+      <div class="label">Gate 1</div>
+      <div style="font-size:15px;font-weight:700;margin-top:6px;line-height:1.4">25 active vendors in one launch pocket</div>
+      <div class="sub">Supply before demand. Tracked manually until vendor data is wired in.</div>
+    </div>
+    <div class="card">
+      <span class="chip pending corner-chip">next</span>
+      <div class="label">Gate 2</div>
+      <div style="font-size:15px;font-weight:700;margin-top:6px;line-height:1.4">15 connections/week + 50 store reviews</div>
+      <div class="goal">
+        <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(100, Math.round((reviewsBest / GOALS.reviews_per_store) * 100))}%"></div></div>
+        <div class="goal-meta"><span>${fmt(reviewsBest)} / ${fmt(GOALS.reviews_per_store)} reviews (best store)</span><span>connections: manual</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="chip pending corner-chip">then</span>
+      <div class="label">Gate 3</div>
+      <div style="font-size:15px;font-weight:700;margin-top:6px;line-height:1.4">Downloads take over as the headline</div>
+      <div class="goal">
+        <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(100, Math.round(((mn.android_installs_lifetime || 0) / GOALS.downloads) * 100))}%"></div></div>
+        <div class="goal-meta"><span>${fmt(mn.android_installs_lifetime)} / ${fmt(GOALS.downloads)} organic</span></div>
+      </div>
+    </div>
+    ${goalCard("Supporting: combined followers", totalFollowers, GOALS.followers, "fuels every gate")}
   </div>
 
   <h2>Audience growth</h2>
