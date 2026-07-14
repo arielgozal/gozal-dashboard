@@ -147,7 +147,37 @@
   .weight-bar { flex: 1; height: 14px; background: var(--grey); border-radius: 999px; overflow: hidden; }
   .weight-fill { height: 100%; background: linear-gradient(90deg, var(--mustard), var(--yellow)); border-radius: 999px; }
   .weight-val { width: 44px; text-align: right; font-size: 13px; font-weight: 800; }
-  input[type=range] { flex: 1; accent-color: var(--mustard); height: 14px; }
+  input[type=range].wslider {
+    -webkit-appearance: none; appearance: none; flex: 1; height: 14px;
+    border-radius: 999px; background: var(--grey); outline: none; cursor: pointer;
+  }
+  input[type=range].wslider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--black); border: 5px solid var(--yellow);
+    box-shadow: 0 1px 5px rgba(16,23,3,.35); cursor: grab;
+  }
+  input[type=range].wslider::-webkit-slider-thumb:active { cursor: grabbing; }
+  input[type=range].wslider::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--black); border: 5px solid var(--yellow);
+    box-shadow: 0 1px 5px rgba(16,23,3,.35); cursor: grab;
+  }
+
+  /* studio */
+  .studio-img { width: 100%; border-radius: 14px; display: block; box-shadow: var(--shadow); }
+  .spin {
+    display: inline-block; width: 13px; height: 13px; vertical-align: -2px; margin-right: 8px;
+    border: 3px solid rgba(16,23,3,.25); border-top-color: var(--black);
+    border-radius: 50%; animation: rot .9s linear infinite;
+  }
+  @keyframes rot { to { transform: rotate(360deg); } }
+  select.studio-sel {
+    font-family: inherit; font-size: 12px; font-weight: 600; color: var(--black);
+    padding: 8px 12px; border-radius: 10px; border: 2px solid var(--grey);
+    background: var(--white); outline: none; max-width: 100%;
+  }
+  select.studio-sel:focus { border-color: var(--yellow); }
 
   .posts-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .posts-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--grey); }
@@ -264,6 +294,9 @@ const STAGES = [
   { id: "create",  no: 5, name: "Create",            sub: "Full scope preview. One explicit CREATE fires generation. Nothing runs without it." },
   { id: "approve", no: 6, name: "Approve & Publish", sub: "Your go/no-go. Nothing publishes without your click." },
 ];
+const TOOLS = [
+  { id: "studio", name: "Studio", sub: "Type it, see it. Nano Banana turns a prompt into brand images your social team can post." },
+];
 const STAGE_OF_ITEM = { idea: "ideas", script: "script", create: "create", create_requested: "create", approve: "approve", approved: "approve" };
 
 let PIPELINE = { items: [] }, WEIGHTS = {}, SIGNALS = {}, METRICS = {};
@@ -330,6 +363,30 @@ function confirmCreate(id) {
 }
 function confirmApprove(id) {
   if (confirm("Approve this content for publishing?")) doMove(id, "approved");
+}
+
+/* moving one slider redistributes the rest proportionally so the total is always exactly 100 */
+function rebalance(moved) {
+  const sliders = [...document.querySelectorAll("input[data-wkey]")];
+  const v = Math.min(100, Math.max(0, Number(moved.value)));
+  moved.value = v;
+  const others = sliders.filter(s => s !== moved);
+  const rest = 100 - v;
+  const sumOthers = others.reduce((a, s) => a + Number(s.value), 0);
+  const shares = others.map(s => sumOthers > 0 ? Number(s.value) / sumOthers * rest : rest / others.length);
+  const floors = shares.map(Math.floor);
+  let rem = rest - floors.reduce((a, b) => a + b, 0);
+  // hand leftover points to the largest fractional parts so it sums to exactly 100
+  shares.map((sh, i) => [sh - floors[i], i]).sort((a, b) => b[0] - a[0])
+    .slice(0, rem).forEach(([, i]) => floors[i]++);
+  others.forEach((s, i) => s.value = floors[i]);
+  sliders.forEach(paintSlider);
+}
+
+function paintSlider(s) {
+  const pct = Number(s.value);
+  s.style.background = `linear-gradient(90deg, var(--yellow) ${pct}%, var(--grey) ${pct}%)`;
+  s.parentElement.querySelector(".weight-val").textContent = pct + "%";
 }
 
 async function saveWeights() {
@@ -444,9 +501,32 @@ function vData() {
   return `<iframe class="dataframe" src="data.html?embed=1"></iframe>`;
 }
 
+let SIG_POSTS = [];
+async function promoteSignal(i) {
+  const p = SIG_POSTS[i];
+  if (!p) return;
+  const t = (p.text || "").replace(/\s+/g, " ").trim().slice(0, 70) || "competitor post";
+  const vendorish = /lead|fee|charge|pro\b|contractor|tasker|book/i.test(p.text || "");
+  try {
+    await api("action", { method: "POST", body: JSON.stringify({ type: "add_item", item: {
+      audience: vendorish ? "vendor" : "consumer",
+      pillar: "Problem/Solution",
+      platform: "TikTok",
+      title: "Our answer to: " + t,
+      hook: "",
+      source_signal: `@${p.account} got ${fmt(p.plays)} views with: "${t}"`,
+      notes: "Promoted from Signals. Original post: " + (p.url || ""),
+    } }) });
+    await loadState();
+    render(current());
+    toast("On the Ideas board ✓");
+  } catch (e) { if (e.message !== "unauthorized") toast("Failed: " + e.message); }
+}
+
 function vSignals() {
   const profiles = SIGNALS.competitor_profiles || [];
   const posts = (SIGNALS.competitor_posts || []).slice(0, 12);
+  SIG_POSTS = posts;
   const gozal = METRICS.metrics || {};
   const profCards = profiles.map(p => `
     <div class="card">
@@ -454,13 +534,14 @@ function vSignals() {
       <div class="big" style="font-size:28px">${fmt(p.followers)} <span style="font-size:13px;color:var(--muted);font-weight:600">followers</span></div>
       <div class="sub">${fmt(p.total_likes)} likes · ${fmt(p.videos)} videos</div>
     </div>`).join("");
-  const rows = posts.map(p => `
+  const rows = posts.map((p, i) => `
     <tr>
       <td class="acct">${esc(p.account)}</td>
       <td><a href="${esc(p.url)}" target="_blank">${esc(p.text) || "(no caption)"}</a></td>
       <td class="num">${fmt(p.plays)}</td>
       <td class="num">${fmt(p.likes)}</td>
       <td>${p.posted ? new Date(p.posted).toLocaleDateString() : "—"}</td>
+      ${INTERACTIVE ? `<td><button class="btn" style="padding:6px 12px;font-size:11px;white-space:nowrap" title="Turn this signal into an idea card" onclick="promoteSignal(${i})">→ Idea</button></td>` : ""}
     </tr>`).join("");
   return `
     <div class="flow-note"><b>The opening:</b> competitor accounts have big follower counts and tiny view counts. Their organic is defensive. The "vendors angry at lead fees" conversation on TikTok has no brand answering it. That lane is ours.</div>
@@ -469,8 +550,8 @@ function vSignals() {
     <h2>Their recent posts, ranked by views</h2>
     <div class="card" style="overflow-x:auto">
       <table class="posts-table">
-        <tr><th>Account</th><th>Post</th><th>Views</th><th>Likes</th><th>Posted</th></tr>
-        ${rows || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">no posts collected yet</td></tr>'}
+        <tr><th>Account</th><th>Post</th><th>Views</th><th>Likes</th><th>Posted</th>${INTERACTIVE ? "<th></th>" : ""}</tr>
+        ${rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">no posts collected yet</td></tr>'}
       </table>
     </div>
     <h2>Gozal, for contrast</h2>
@@ -492,8 +573,9 @@ function vIdeas() {
   const sliders = Object.entries(labels).map(([k, name]) => INTERACTIVE ? `
     <div class="weight-row">
       <div class="weight-name">${name}</div>
-      <input type="range" min="0" max="100" step="5" value="${w[k] || 0}" data-wkey="${k}"
-        oninput="this.parentElement.querySelector('.weight-val').textContent=this.value+'%'">
+      <input type="range" class="wslider" min="0" max="100" step="1" value="${w[k] || 0}" data-wkey="${k}"
+        style="background:linear-gradient(90deg, var(--yellow) ${w[k] || 0}%, var(--grey) ${w[k] || 0}%)"
+        oninput="rebalance(this)">
       <div class="weight-val">${w[k] ?? 0}%</div>
     </div>` : `
     <div class="weight-row">
@@ -507,7 +589,7 @@ function vIdeas() {
     <div class="card">
       ${sliders}
       <div class="btn-row">${INTERACTIVE
-        ? liveBtn("Save weights", "saveWeights()", true) + '<span class="meta">Should add up to ~100%</span>'
+        ? liveBtn("Save weights", "saveWeights()", true) + '<span class="meta">Locked to 100% — move one slider and the others rebalance.</span>'
         : lockedBtn("Adjust weights", true) + '<span class="meta">Sliders unlock on the team app.</span>'}</div>
     </div>
     <h2 style="display:flex;align-items:center;gap:14px">Idea board · ${items.length} waiting
@@ -574,6 +656,7 @@ function vScript() {
 
 const CREATORS = [
   { id: "higgsfield", label: "🎬 Higgsfield video", desc: "AI video (Kling 3.0) — uses Higgsfield API credits" },
+  { id: "nano-banana", label: "🍌 Nano Banana photos", desc: "Photoreal social images (Google Gemini) — delivered by the studio worker within ~15 min" },
   { id: "claude-image", label: "🖼 Claude images", desc: "Brand graphics: carousels, quote cards, checklists — free" },
   { id: "text", label: "📝 Text only", desc: "Final post copy, no visuals" },
 ];
@@ -607,7 +690,7 @@ function creatorPicker(it) {
 function vCreate() {
   const items = (PIPELINE.items || []).filter(i => i.stage === "create" || i.stage === "create_requested");
   return `
-    <div class="flow-note"><b>The hard rule:</b> only your explicit CREATE click queues generation, and you choose the maker per post: Higgsfield video, Claude-designed brand images, or plain text. Workers check the queue every 15 minutes and deliver to the Approve board.</div>
+    <div class="flow-note"><b>The hard rule:</b> only your explicit CREATE click queues generation, and you choose the maker per post: Higgsfield video, Nano Banana photos, Claude-designed brand graphics, or plain text. Workers check the queue every 15 minutes and deliver to the Approve board. Need a one-off image right now? Use the 🍌 Studio tab.</div>
     <div class="grid g2">
       ${items.map(it => itemCard(it, it.stage === "create_requested"
           ? (INTERACTIVE ? liveBtn("Cancel request", `doMove('${it.id}','create')`) : "")
@@ -679,7 +762,109 @@ function vApprove() {
     </div>`;
 }
 
-const VIEWS = { data: vData, signals: vSignals, ideas: vIdeas, script: vScript, create: vCreate, approve: vApprove };
+/* ── Studio (Nano Banana) ── */
+const STUDIO_STYLES = {
+  photo: { label: "📸 Real-life photo", prefix: "Photorealistic candid smartphone-style photo, natural light, authentic real people, believable home-service scene, no text, no logos, no watermarks. " },
+  brand: { label: "🟡 Brand graphic", prefix: "Bold flat social-media graphic. Gozal brand: vivid yellow (#FDCB15) dominant, near-black (#101703) accents, warm cream background, rounded geometric shapes, modern bold sans-serif for any large text, generous margins, crisp and screenshot-worthy. " },
+  split: { label: "🛠 Before / after", prefix: "Split-frame before-and-after photograph of a home repair, same camera angle on both sides, photorealistic, natural light, no text, no watermarks. " },
+  free: { label: "🍌 Freestyle", prefix: "" },
+};
+const STUDIO = { style: "photo", aspect: "9:16", count: 2, prompt: "", busy: false, results: [], error: null, checked: false };
+let BANANA_OK = false;
+
+async function checkBanana() {
+  try { BANANA_OK = !!(await api("banana")).configured; }
+  catch (e) { BANANA_OK = false; }
+  STUDIO.checked = true;
+  if (current() === "studio") render("studio");
+}
+
+function setStudio(k, v) { STUDIO[k] = v; render("studio"); }
+
+function studioFromItem(id) {
+  if (!id) return;
+  const it = (PIPELINE.items || []).find(i => i.id === id);
+  if (!it) return;
+  STUDIO.prompt = `${it.title}. ${it.hook || ""}`.replace(/\s+/g, " ").trim();
+  render("studio");
+}
+
+async function generateStudio() {
+  STUDIO.prompt = (document.getElementById("studio-prompt")?.value || STUDIO.prompt).trim();
+  if (!STUDIO.prompt) { toast("Describe the image first"); return; }
+  STUDIO.busy = true; STUDIO.error = null;
+  render("studio");
+  try {
+    const full = STUDIO_STYLES[STUDIO.style].prefix + STUDIO.prompt + " High quality, social-media ready.";
+    const r = await api("banana", { method: "POST", body: JSON.stringify({ prompt: full, count: STUDIO.count, aspect: STUDIO.aspect }) });
+    if (!r.ok) STUDIO.error = r.error || "Generation failed — try rephrasing.";
+    else STUDIO.results = r.images.map(im => ({ url: `data:${im.mime};base64,${im.data}`, at: Date.now() })).concat(STUDIO.results).slice(0, 12);
+  } catch (e) {
+    if (e.message === "unauthorized") { STUDIO.busy = false; return; }
+    STUDIO.error = e.message;
+  }
+  STUDIO.busy = false;
+  render("studio");
+  if (!STUDIO.error) toast("Fresh out of the studio ✓");
+}
+
+function vStudio() {
+  if (!INTERACTIVE) return `
+    <div class="flow-note"><b>The studio.</b> On the team app this tab turns a text prompt into ready-to-post brand images with Nano Banana (Google's image model). Downloads land straight in your folder for the social team.</div>
+    <div class="empty"><b>Preview mode.</b><br>Open the team app to generate images.</div>`;
+  if (STUDIO.checked && !BANANA_OK) return `
+    <div class="flow-note"><b>One-time setup needed.</b> The studio runs on Google's Nano Banana image model and needs a (free) Gemini API key.</div>
+    <div class="card">
+      <div class="item-title">Connect Nano Banana</div>
+      <div class="meta" style="font-size:13px;line-height:2">1. Grab a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> (sign in with Google → Create API key)
+2. In Terminal, from the dashboard folder, run:</div>
+      <div class="hook" style="font-family:monospace;font-size:12px">npx wrangler pages secret put GEMINI_API_KEY --project-name gozal-engine</div>
+      <div class="meta" style="font-size:13px">3. Paste the key when asked, then refresh this page. Or just ask Claude to walk you through it.</div>
+    </div>`;
+  if (!STUDIO.checked) { checkBanana(); return '<div class="empty">Checking the studio connection…</div>'; }
+  const chip = (on, label, fn) => `<button class="btn ${on ? "primary" : "ghost"}" style="padding:7px 13px;font-size:11px" onclick="${fn}">${label}</button>`;
+  const itemOpts = (PIPELINE.items || []).filter(i => !["archived", "rejected"].includes(i.stage))
+    .map(i => `<option value="${esc(i.id)}">${esc(i.title)}</option>`).join("");
+  return `
+    <div class="flow-note"><b>Type it, see it.</b> Describe the image, pick a style and size, hit Generate. Download what you like and hand it to the social team — nothing posts from here. Powered by Nano Banana (Google Gemini).</div>
+    <div class="card">
+      <div class="label" style="margin-bottom:8px">Style</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${Object.entries(STUDIO_STYLES).map(([k, s]) => chip(STUDIO.style === k, s.label, `setStudio('style','${k}')`)).join("")}
+      </div>
+      <div class="label" style="margin:14px 0 8px">Size</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${chip(STUDIO.aspect === "9:16", "📱 9:16 Reels/TikTok", "setStudio('aspect','9:16')")}
+        ${chip(STUDIO.aspect === "1:1", "⬜ 1:1 Feed/Carousel", "setStudio('aspect','1:1')")}
+        ${chip(STUDIO.aspect === "16:9", "🖥 16:9 Wide", "setStudio('aspect','16:9')")}
+      </div>
+      <div class="label" style="margin:14px 0 8px">How many</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${[1, 2, 3, 4].map(n => chip(STUDIO.count === n, String(n), `setStudio('count',${n})`)).join("")}
+      </div>
+      <div class="label" style="margin:14px 0 6px">What should it show?</div>
+      <textarea id="studio-prompt" class="script-ta" style="min-height:90px"
+        placeholder="e.g. A plumber in his van at golden hour, smiling at his phone after landing a job"
+        oninput="STUDIO.prompt=this.value">${esc(STUDIO.prompt)}</textarea>
+      <div class="btn-row">
+        <button class="btn primary" ${STUDIO.busy ? "disabled" : ""} onclick="generateStudio()">
+          ${STUDIO.busy ? '<span class="spin"></span>Generating…' : "✨ Generate"}</button>
+        ${itemOpts ? `<select class="studio-sel" onchange="studioFromItem(this.value);this.value=''">
+          <option value="">…or start from a pipeline item</option>${itemOpts}</select>` : ""}
+      </div>
+      ${STUDIO.error ? `<div class="meta" style="color:var(--red);margin-top:10px"><b>Didn't work:</b> ${esc(STUDIO.error)}</div>` : ""}
+    </div>
+    ${STUDIO.results.length ? `
+    <h2>Results — click ⬇ to save</h2>
+    <div class="grid g3">
+      ${STUDIO.results.map((r, i) => `<div class="card" style="padding:14px">
+        <img class="studio-img" src="${r.url}" alt="generated image ${i + 1}">
+        <div class="btn-row">${liveBtn("⬇ Download", `downloadAsset(STUDIO.results[${i}].url,'gozal-studio-${r.at}-${i + 1}.png')`, true)}</div>
+      </div>`).join("")}
+    </div>` : ""}`;
+}
+
+const VIEWS = { data: vData, signals: vSignals, ideas: vIdeas, script: vScript, create: vCreate, approve: vApprove, studio: vStudio };
 
 function renderRail(active) {
   const c = counts();
@@ -687,6 +872,11 @@ function renderRail(active) {
     <button class="rail-item ${s.id === active ? "active" : ""}" onclick="go('${s.id}')">
       <span class="step-no">${s.no}</span> ${s.name}
       ${c[s.id] ? `<span class="count">${c[s.id]}</span>` : ""}
+    </button>`).join("")
+  + '<div class="rail-section">Tools</div>'
+  + TOOLS.map(t => `
+    <button class="rail-item ${t.id === active ? "active" : ""}" onclick="go('${t.id}')">
+      <span class="step-no">🍌</span> ${t.name}
     </button>`).join("");
 }
 
@@ -698,7 +888,7 @@ function go(id) {
 }
 
 function render(id) {
-  const stage = STAGES.find(s => s.id === id) || STAGES[0];
+  const stage = STAGES.find(s => s.id === id) || TOOLS.find(t => t.id === id) || STAGES[0];
   renderRail(stage.id);
   document.getElementById("vtitle").textContent = stage.name;
   document.getElementById("vsub").textContent = stage.sub;

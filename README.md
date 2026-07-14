@@ -20,6 +20,12 @@ The content pipeline + auto-updating growth metrics for Gozal App in one place.
   Cloudflare KV behind `functions/api/`; the daily agent
   (`.github/workflows/engine-agent.yml` + `agent/DAILY.md`) keeps the idea
   pool stocked and drafts scripts/captions. It never moves stages or posts.
+- The **Studio** tab generates one-off brand images with Nano Banana
+  (Google Gemini) via `functions/api/banana.js`. The same model powers the
+  🍌 creator option in the Create stage (delivered by `studio_worker.py`).
+  Needs a one-time secret:
+  `npx wrangler pages secret put GEMINI_API_KEY --project-name gozal-engine`
+  (free key from https://aistudio.google.com/apikey).
 
 ## What's live vs pending
 

@@ -5,6 +5,8 @@
 //   weights    { weights: {..} }          — update ideation weights (auto-normalized to 100)
 //   draw_ideas { count? }                 — pull fresh ideas from the pool onto the Ideas board
 //   add_pool   { items: [..] }            — refill the idea pool (used by the daily agent)
+//   add_item   { item: {..} }             — drop one item straight onto the Ideas board
+//                                           (used by the Signals "→ Idea" button)
 // Stage vocabulary: idea, script, create, create_requested, approve,
 //                   approved, rejected, archived
 
@@ -84,6 +86,29 @@ export async function onRequestPost(ctx) {
     await kv.put("idea_pool", JSON.stringify(pool));
     await appendLog(kv, { at: now, type: "draw_ideas", count: drawn.length });
     return Response.json({ ok: true, drawn: drawn.length, pool_left: (pool.items || []).length });
+  }
+
+  if (body.type === "add_item") {
+    const it = body.item || {};
+    if (!it.title) return new Response("item needs a title", { status: 400 });
+    const pipeline = (await kv.get("pipeline", "json")) || { items: [] };
+    const item = {
+      id: "sig-" + Math.random().toString(36).slice(2, 8),
+      stage: "idea",
+      audience: it.audience === "vendor" ? "vendor" : "consumer",
+      pillar: String(it.pillar || "Problem/Solution").slice(0, 60),
+      platform: String(it.platform || "TikTok").slice(0, 40),
+      title: String(it.title).slice(0, 140),
+      hook: String(it.hook || "").slice(0, 400),
+      source_signal: String(it.source_signal || "added by hand").slice(0, 400),
+      notes: String(it.notes || "").slice(0, 1200),
+      created: now.slice(0, 10),
+    };
+    pipeline.items.push(item);
+    pipeline.updated = now;
+    await kv.put("pipeline", JSON.stringify(pipeline));
+    await appendLog(kv, { at: now, type: "add_item", id: item.id, title: item.title });
+    return Response.json({ ok: true, id: item.id });
   }
 
   if (body.type === "add_pool") {
