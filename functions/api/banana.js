@@ -46,8 +46,9 @@ async function generateOne(key, prompt, aspect) {
     ? { contents, generationConfig: { imageConfig: { aspectRatio: aspect } } }
     : { contents };
   let r = await callGemini(key, withAspect);
-  // if the aspect config is rejected by the API, retry without it
-  if (!r.ok && aspect) r = await callGemini(key, { contents });
+  // if the aspect config itself is rejected (400), retry without it —
+  // but never retry quota/rate errors (429), that just burns more quota
+  if (r.status === 400 && aspect) r = await callGemini(key, { contents });
   if (!r.ok) return { error: `Gemini ${r.status}: ${(await r.text()).slice(0, 300)}` };
   const data = await r.json();
   const parts = data.candidates?.[0]?.content?.parts || [];
