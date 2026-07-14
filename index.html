@@ -852,7 +852,8 @@ function vStudio() {
         ${itemOpts ? `<select class="studio-sel" onchange="studioFromItem(this.value);this.value=''">
           <option value="">…or start from a pipeline item</option>${itemOpts}</select>` : ""}
       </div>
-      ${STUDIO.error ? `<div class="meta" style="color:var(--red);margin-top:10px"><b>Didn't work:</b> ${esc(STUDIO.error)}</div>` : ""}
+      ${STUDIO.error ? `<div class="meta" style="color:var(--red);margin-top:10px"><b>Didn't work:</b> ${esc(STUDIO.error)}
+${/quota|429|billing/i.test(STUDIO.error) ? "Nano Banana has no free tier — it needs billing enabled at aistudio.google.com/projects (~4¢/image). Free alternative with no setup: go to Create, pick 🖼 Claude images as the maker, and hit ⚡ CREATE — brand graphics land on Approve within ~15 min." : ""}</div>` : ""}
     </div>
     ${STUDIO.results.length ? `
     <h2>Results — click ⬇ to save</h2>
