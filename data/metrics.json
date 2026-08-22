@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-08-22T06:58:26+00:00",
+  "last_updated": "2026-08-22T12:59:28+00:00",
   "metrics": {
     "ios_rating": 4.5,
     "ios_ratings_count": 17,
@@ -13,7 +13,7 @@
     "youtube_subscribers": 36,
     "youtube_videos": 105,
     "facebook_followers": 147,
-    "facebook_likes": 149
+    "facebook_likes": 150
   },
   "manual": {
     "android_installs_lifetime": 141,
@@ -32,11 +32,11 @@
     "download_counts": false
   },
   "sources_updated": {
-    "app_store": "2026-08-22T06:58:26+00:00",
-    "google_play": "2026-08-22T06:58:26+00:00",
-    "tiktok": "2026-08-22T06:58:26+00:00",
-    "instagram": "2026-08-22T06:58:26+00:00",
-    "youtube": "2026-08-22T06:58:26+00:00",
-    "facebook": "2026-08-22T06:58:26+00:00"
+    "app_store": "2026-08-22T12:59:28+00:00",
+    "google_play": "2026-08-22T12:59:28+00:00",
+    "tiktok": "2026-08-22T12:59:28+00:00",
+    "instagram": "2026-08-22T12:59:28+00:00",
+    "youtube": "2026-08-22T12:59:28+00:00",
+    "facebook": "2026-08-22T12:59:28+00:00"
   }
 }
