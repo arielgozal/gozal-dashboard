@@ -3043,5 +3043,21 @@
     "youtube_videos": 110,
     "facebook_followers": 147,
     "facebook_likes": 151
+  },
+  {
+    "ts": "2026-08-26T20:01:24+00:00",
+    "ios_rating": 4.5,
+    "ios_ratings_count": 17,
+    "android_rating": 5.0,
+    "android_ratings_count": 14,
+    "tiktok_followers": 132,
+    "tiktok_likes": 621,
+    "tiktok_videos": 109,
+    "instagram_followers": 34,
+    "instagram_posts": 190,
+    "youtube_subscribers": 37,
+    "youtube_videos": 112,
+    "facebook_followers": 147,
+    "facebook_likes": 151
   }
 ]
