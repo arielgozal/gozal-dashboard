@@ -5555,5 +5555,21 @@
     "youtube_videos": 125,
     "facebook_likes": 157,
     "facebook_followers": 162
+  },
+  {
+    "ts": "2026-10-10T12:30:09+00:00",
+    "ios_rating": 4.5,
+    "ios_ratings_count": 17,
+    "android_rating": 5.0,
+    "android_ratings_count": 14,
+    "tiktok_followers": 128,
+    "tiktok_likes": 625,
+    "tiktok_videos": 109,
+    "instagram_followers": 39,
+    "instagram_posts": 209,
+    "youtube_subscribers": 42,
+    "youtube_videos": 125,
+    "facebook_likes": 157,
+    "facebook_followers": 162
   }
 ]
